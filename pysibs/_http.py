@@ -8,26 +8,37 @@ touches ``httpx`` directly:
   into exception messages/bodies;
 * every ``httpx`` error is translated into a PySIBS exception;
 * JSON parsing and HTTP-status-to-exception mapping live in one place and are shared
-  between the sync and async clients.
+  between the sync and async clients;
+* retries with backoff (see :mod:`pysibs._retry`) and credential-safe debug logging
+  are applied uniformly.
 """
 
 from __future__ import annotations
 
+import logging
+import time
 from typing import Any
 
 import httpx
 
+from ._retry import RetryConfig, retry_after_seconds
 from ._version import __version__
 from .exceptions import (
     SIBSAPIError,
     SIBSAuthenticationError,
     SIBSConnectionError,
+    SIBSRateLimitError,
     SIBSTimeoutError,
 )
 
 __all__ = ["HTTPClient", "AsyncHTTPClient"]
 
 JSONDict = dict[str, Any]
+
+# Library logger. PySIBS never attaches a handler; configure logging in your app to see
+# these DEBUG records. Records carry method/path/status/attempt/elapsed only -- never
+# headers, bodies or credentials.
+logger = logging.getLogger("pysibs")
 
 
 def _build_default_headers(api_key: str, client_id: str | None) -> dict[str, str]:
@@ -67,7 +78,6 @@ def _map_status_error(response: httpx.Response) -> Exception:
     """
     status = response.status_code
     body = _parse_json(response)
-    message = f"SIBS API request failed with HTTP {status}."
 
     if status in (401, 403):
         return SIBSAuthenticationError(
@@ -75,8 +85,19 @@ def _map_status_error(response: httpx.Response) -> Exception:
         )
     if status == 408:
         return SIBSTimeoutError("SIBS API returned HTTP 408 (request timeout).")
+    if status == 429:
+        return SIBSRateLimitError(
+            "SIBS API rate limit exceeded (HTTP 429).",
+            status_code=429,
+            response_body=body,
+            retry_after=retry_after_seconds(response.headers.get("Retry-After")),
+        )
 
-    return SIBSAPIError(message, status_code=status, response_body=body)
+    return SIBSAPIError(
+        f"SIBS API request failed with HTTP {status}.",
+        status_code=status,
+        response_body=body,
+    )
 
 
 def _check_response(response: httpx.Response) -> JSONDict:
@@ -100,13 +121,19 @@ class HTTPClient:
         api_key: str,
         *,
         client_id: str | None = None,
-        timeout: float = 30.0,
+        timeout: float | httpx.Timeout = 30.0,
+        retries: RetryConfig | None = None,
+        verify: bool | str = True,
+        proxy: str | None = None,
         transport: httpx.BaseTransport | None = None,
     ) -> None:
+        self._retries = retries if retries is not None else RetryConfig()
         self._client = httpx.Client(
             base_url=base_url,
             headers=_build_default_headers(api_key, client_id),
             timeout=timeout,
+            verify=verify,
+            proxy=proxy,
             transport=transport,
         )
 
@@ -118,13 +145,36 @@ class HTTPClient:
         json: JSONDict | None = None,
         headers: dict[str, str] | None = None,
     ) -> JSONDict:
-        try:
-            response = self._client.request(method, path, json=json, headers=headers)
-        except httpx.TimeoutException as exc:
-            raise SIBSTimeoutError(f"Request to SIBS timed out: {exc!s}") from exc
-        except httpx.TransportError as exc:
-            raise SIBSConnectionError(f"Could not connect to SIBS: {exc!s}") from exc
-        return _check_response(response)
+        attempt = 0
+        while True:
+            started = time.monotonic()
+            try:
+                response = self._client.request(method, path, json=json, headers=headers)
+            except httpx.TimeoutException as exc:
+                if self._retries.should_retry_exception(method, attempt):
+                    _log_retry(method, path, attempt, reason="timeout")
+                    time.sleep(self._retries.backoff(attempt))
+                    attempt += 1
+                    continue
+                raise SIBSTimeoutError(f"Request to SIBS timed out: {exc!s}") from exc
+            except httpx.TransportError as exc:
+                if self._retries.should_retry_exception(method, attempt):
+                    _log_retry(method, path, attempt, reason="connection")
+                    time.sleep(self._retries.backoff(attempt))
+                    attempt += 1
+                    continue
+                raise SIBSConnectionError(f"Could not connect to SIBS: {exc!s}") from exc
+
+            _log_response(method, path, response.status_code, started, attempt)
+            if not response.is_success and self._retries.should_retry_status(
+                method, response.status_code, attempt
+            ):
+                retry_after = retry_after_seconds(response.headers.get("Retry-After"))
+                _log_retry(method, path, attempt, reason=f"status {response.status_code}")
+                time.sleep(self._retries.backoff(attempt, retry_after))
+                attempt += 1
+                continue
+            return _check_response(response)
 
     def close(self) -> None:
         self._client.close()
@@ -145,13 +195,19 @@ class AsyncHTTPClient:
         api_key: str,
         *,
         client_id: str | None = None,
-        timeout: float = 30.0,
+        timeout: float | httpx.Timeout = 30.0,
+        retries: RetryConfig | None = None,
+        verify: bool | str = True,
+        proxy: str | None = None,
         transport: httpx.AsyncBaseTransport | None = None,
     ) -> None:
+        self._retries = retries if retries is not None else RetryConfig()
         self._client = httpx.AsyncClient(
             base_url=base_url,
             headers=_build_default_headers(api_key, client_id),
             timeout=timeout,
+            verify=verify,
+            proxy=proxy,
             transport=transport,
         )
 
@@ -163,13 +219,38 @@ class AsyncHTTPClient:
         json: JSONDict | None = None,
         headers: dict[str, str] | None = None,
     ) -> JSONDict:
-        try:
-            response = await self._client.request(method, path, json=json, headers=headers)
-        except httpx.TimeoutException as exc:
-            raise SIBSTimeoutError(f"Request to SIBS timed out: {exc!s}") from exc
-        except httpx.TransportError as exc:
-            raise SIBSConnectionError(f"Could not connect to SIBS: {exc!s}") from exc
-        return _check_response(response)
+        import asyncio
+
+        attempt = 0
+        while True:
+            started = time.monotonic()
+            try:
+                response = await self._client.request(method, path, json=json, headers=headers)
+            except httpx.TimeoutException as exc:
+                if self._retries.should_retry_exception(method, attempt):
+                    _log_retry(method, path, attempt, reason="timeout")
+                    await asyncio.sleep(self._retries.backoff(attempt))
+                    attempt += 1
+                    continue
+                raise SIBSTimeoutError(f"Request to SIBS timed out: {exc!s}") from exc
+            except httpx.TransportError as exc:
+                if self._retries.should_retry_exception(method, attempt):
+                    _log_retry(method, path, attempt, reason="connection")
+                    await asyncio.sleep(self._retries.backoff(attempt))
+                    attempt += 1
+                    continue
+                raise SIBSConnectionError(f"Could not connect to SIBS: {exc!s}") from exc
+
+            _log_response(method, path, response.status_code, started, attempt)
+            if not response.is_success and self._retries.should_retry_status(
+                method, response.status_code, attempt
+            ):
+                retry_after = retry_after_seconds(response.headers.get("Retry-After"))
+                _log_retry(method, path, attempt, reason=f"status {response.status_code}")
+                await asyncio.sleep(self._retries.backoff(attempt, retry_after))
+                attempt += 1
+                continue
+            return _check_response(response)
 
     async def aclose(self) -> None:
         await self._client.aclose()
@@ -179,3 +260,16 @@ class AsyncHTTPClient:
 
     async def __aexit__(self, *exc_info: object) -> None:
         await self.aclose()
+
+
+def _log_response(method: str, path: str, status: int, started: float, attempt: int) -> None:
+    if logger.isEnabledFor(logging.DEBUG):
+        elapsed_ms = (time.monotonic() - started) * 1000
+        logger.debug(
+            "SIBS %s %s -> %s (%.0fms, attempt %d)", method, path, status, elapsed_ms, attempt + 1
+        )
+
+
+def _log_retry(method: str, path: str, attempt: int, *, reason: str) -> None:
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug("SIBS %s %s retrying after %s (attempt %d)", method, path, reason, attempt + 1)

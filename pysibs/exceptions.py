@@ -18,6 +18,7 @@ __all__ = [
     "SIBSValidationError",
     "SIBSAuthenticationError",
     "SIBSAPIError",
+    "SIBSRateLimitError",
     "SIBSTimeoutError",
     "SIBSConnectionError",
     "SIBSInvalidWebhookSignature",
@@ -63,6 +64,25 @@ class SIBSAPIError(SIBSError):
         if self.status_code is not None:
             return f"{self.message} (status_code={self.status_code})"
         return self.message
+
+
+class SIBSRateLimitError(SIBSAPIError):
+    """Raised when SIBS returns HTTP 429 (too many requests).
+
+    Subclasses :class:`SIBSAPIError` for backwards compatibility. ``retry_after`` is the
+    number of seconds the server asked us to wait (from the ``Retry-After`` header), if
+    provided.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        status_code: int | None = 429,
+        response_body: dict[str, Any] | str | None = None,
+        retry_after: float | None = None,
+    ) -> None:
+        super().__init__(message, status_code=status_code, response_body=response_body)
+        self.retry_after = retry_after
 
 
 class SIBSTimeoutError(SIBSError):
