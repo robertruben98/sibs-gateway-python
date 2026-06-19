@@ -157,6 +157,7 @@ def test_build_browser_data() -> None:
     assert data["browserScreenHeight"] == "1080"
     assert data["browserTZ"] == "-60"
     assert data["browserJavaEnabled"] is False
-    assert data["browserJavascriptEnabled"] is True
     assert data["browserColorDepth"] == "24"
     assert data["browserLanguage"] == "en-US"
+    # SIBS' deviceInfo schema has no browserJavascriptEnabled field.
+    assert "browserJavascriptEnabled" not in data

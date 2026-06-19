@@ -6,6 +6,31 @@ All notable changes to this project are documented here. This project adheres to
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-06-19
+
+Further verification against the **Checkout API 2.0.1 swagger** on the SIBS API Market
+sandbox (`developer.sibsapimarket.com`). See `docs/internal-notes.md`.
+
+### Fixed
+- **`build_browser_data` (breaking).** Removed the `browserJavascriptEnabled` field (and
+  its `javascript_enabled` argument): it is **not** part of SIBS' `deviceInfo` schema, so
+  sending it risked rejection. The remaining `browser*` field names are confirmed against
+  the swagger.
+
+### Changed
+- **Confirmed contract details now documented** (payloads remain opaque/flexible):
+  `merchantInitiatedTransaction.type` is **`UCOF`** or **`RCRR`** (plus `validityDate`,
+  `amountQualifier` = `DEFAULT`/`ESTIMATED`/`ACTUAL`, `schedule`, `active`);
+  `originalTransaction{id, datetime, recipientId}`; `tokenList` items carry
+  `tokenName/tokenType/value/maskedPAN/expireDate`; `tokenisationRequest.tokeniseCard`.
+- **Sandbox host note** in `config.py`: the free Developer Portal sandbox is
+  `https://sandbox.sibspayments.com/sibs/spg/v2` (pass via `base_url=`), distinct from the
+  contracted quality host `api.qly.sibspayments.com`.
+
+### Notes
+- Remaining for 1.0.0 (tracked in `docs/internal-notes.md`): the documented AES webhook
+  key bit-length and the 3DS *resubmit* body/endpoint in the server-to-server CARD API.
+
 ## [0.8.0] - 2026-06-19
 
 Contract hardening from a fresh verification against the official SIBS documentation
@@ -139,7 +164,8 @@ Grounded in a review of the official SIBS Gateway documentation
 - Full exception hierarchy under `SIBSError`; raw `httpx` errors never leak.
 - Documentation, examples (Django/FastAPI), CI and PyPI publish workflows.
 
-[Unreleased]: https://github.com/robertruben98/pysibs/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/robertruben98/pysibs/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/robertruben98/pysibs/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/robertruben98/pysibs/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/robertruben98/pysibs/compare/v0.4.0...v0.7.0
 [0.4.0]: https://github.com/robertruben98/pysibs/compare/v0.3.0...v0.4.0

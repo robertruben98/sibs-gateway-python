@@ -45,7 +45,11 @@ class SIBSEnvironment(str, Enum):
 
 
 # NOTE: confirm against the current official SIBS documentation before publishing.
-# Historically the quality/sandbox and production hosts have looked like the below.
+# The quality/sandbox and production hosts. Note SIBS exposes (at least) two test hosts:
+# the contracted *quality* host below, and the free Developer Portal sandbox at
+# ``https://sandbox.sibspayments.com/sibs/spg/v2`` (no certificate/contract; the swagger
+# confirms this host + the ``/sibs/spg/v2`` prefix). If you registered on
+# developer.sibsapimarket.com, pass ``base_url="https://sandbox.sibspayments.com/sibs/spg/v2"``.
 BASE_URLS: dict[SIBSEnvironment, str] = {
     SIBSEnvironment.SANDBOX: "https://api.qly.sibspayments.com/sibs/spg/v2",
     SIBSEnvironment.PRODUCTION: "https://api.sibspayments.com/sibs/spg/v2",
@@ -104,9 +108,7 @@ class ClientConfig:
             base_url=resolved_base_url,
             timeout=resolved_timeout,
             client_id=(
-                client_id.strip()
-                if isinstance(client_id, str) and client_id.strip()
-                else None
+                client_id.strip() if isinstance(client_id, str) and client_id.strip() else None
             ),
             webhook_secret=webhook_secret or None,
         )
