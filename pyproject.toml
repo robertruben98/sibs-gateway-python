@@ -1,0 +1,118 @@
+[project]
+name = "pysibs"
+version = "0.1.0"
+description = "A modern Python SDK for SIBS Gateway payment integrations."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Robert Benitez" }]
+keywords = [
+  "sibs",
+  "payments",
+  "payment-gateway",
+  "mbway",
+  "multibanco",
+  "fintech",
+  "python-sdk",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Office/Business :: Financial",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Typing :: Typed",
+]
+dependencies = [
+  "httpx>=0.27.0",
+  "pydantic>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-cov",
+  "pytest-asyncio",
+  "respx>=0.21",
+  "ruff",
+  "mypy",
+  "build",
+  "twine",
+]
+examples = [
+  "python-dotenv",
+  "fastapi",
+  "uvicorn",
+  "django",
+]
+
+[project.urls]
+Homepage = "https://github.com/robertruben98/pysibs"
+Repository = "https://github.com/robertruben98/pysibs"
+Issues = "https://github.com/robertruben98/pysibs/issues"
+Documentation = "https://github.com/robertruben98/pysibs#readme"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pysibs"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/pysibs",
+  "/tests",
+  "/README.md",
+  "/LICENSE",
+  "/CHANGELOG.md",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "W", "C4", "SIM"]
+ignore = ["B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+disallow_untyped_defs = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["respx.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = [
+  "integration: integration tests that hit a real SIBS sandbox (disabled by default)",
+]
+addopts = "-m 'not integration'"
+
+[tool.coverage.run]
+source = ["pysibs"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+  "pragma: no cover",
+  "if TYPE_CHECKING:",
+  "raise NotImplementedError",
+  "\\.\\.\\.",
+]
