@@ -18,7 +18,10 @@ from decimal import Decimal
 from typing import Any
 
 from .enums import TransactionType, normalize_payment_status
+from .exceptions import SIBSValidationError
 from .models import (
+    ActionResponse,
+    CardPaymentResponse,
     MBWayResponse,
     OperationResponse,
     PaymentReference,
@@ -247,6 +250,50 @@ def parse_operation_response(data: JSONDict, payment_id: str) -> OperationRespon
         payment_id=_extract_id(data) or payment_id,
         status=normalized,
         raw_status=raw_status,
+        raw_response=data,
+    )
+
+
+def _extract_action_response(data: JSONDict) -> ActionResponse | None:
+    """Parse an ``actionResponse`` object (e.g. a 3D-Secure redirect), if present."""
+    action = data.get("actionResponse") or data.get("action")
+    if not isinstance(action, dict) or not action:
+        return None
+
+    inner = action.get("data")
+    inner = inner if isinstance(inner, dict) else {}
+    params = inner.get("params")
+    if not isinstance(params, dict):
+        params = {}
+
+    return ActionResponse(
+        type=action.get("type") or action.get("actionType"),
+        method=str(inner.get("method") or action.get("method") or "POST").upper(),
+        url=inner.get("url") or action.get("url"),
+        params=params,
+        raw=action,
+    )
+
+
+def build_card_payload(card: JSONDict) -> JSONDict:
+    """Pass through an opaque card payload built by the caller.
+
+    PySIBS deliberately does **not** model raw card fields (PAN/CVV) to avoid fixing an
+    unverified contract and to keep cardholder data out of the library's typed surface.
+    The caller supplies the exact JSON body their integration requires.
+    """
+    if not isinstance(card, dict) or not card:
+        raise SIBSValidationError("card must be a non-empty dict (the SIBS card payload).")
+    return card
+
+
+def parse_card_response(data: JSONDict, payment_id: str) -> CardPaymentResponse:
+    raw_status, normalized = _normalize(data)
+    return CardPaymentResponse(
+        payment_id=_extract_id(data) or payment_id,
+        status=normalized,
+        raw_status=raw_status,
+        action=_extract_action_response(data),
         raw_response=data,
     )
 

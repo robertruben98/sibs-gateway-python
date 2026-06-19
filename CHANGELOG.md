@@ -6,6 +6,26 @@ All notable changes to this project are documented here. This project adheres to
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-06-19
+
+Adds server-to-server card payments and 3D-Secure, grounded in the official SIBS
+documentation; see `docs/cards.md` and `docs/internal-notes.md`.
+
+### Added
+- `pay_with_card()` (sync + async) — submits an **opaque** card payload (the caller
+  builds the body; PySIBS does not model PAN/CVV) with `Authorization: Digest` auth.
+- `submit_3ds()` (sync + async) — submits the 3D-Secure authentication step.
+- `CardPaymentResponse` with a `requires_3ds` helper, and `ActionResponse` describing
+  the 3DS redirect (`url`, `params`, `method`).
+- `pysibs.threeds`: `build_3ds_redirect()` and `render_3ds_redirect_html()` (an
+  auto-submitting, HTML-escaped redirect page).
+- `PaymentStatus.ACTION_REQUIRED` (SIBS `"Partial"` → 3DS required).
+
+### Notes
+- Card/3DS endpoint paths default to `card-id/purchase` / `card-id/3ds` and are
+  overridable via `path=`; the exact contract is not fully public — verify per
+  integration. Transmitting card data brings your environment into PCI DSS scope.
+
 ## [0.2.0] - 2026-06-19
 
 Grounded in a review of the official SIBS Gateway documentation
@@ -48,6 +68,7 @@ Grounded in a review of the official SIBS Gateway documentation
 - Full exception hierarchy under `SIBSError`; raw `httpx` errors never leak.
 - Documentation, examples (Django/FastAPI), CI and PyPI publish workflows.
 
-[Unreleased]: https://github.com/robertruben98/pysibs/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/robertruben98/pysibs/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/robertruben98/pysibs/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/robertruben98/pysibs/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/robertruben98/pysibs/releases/tag/v0.1.0
