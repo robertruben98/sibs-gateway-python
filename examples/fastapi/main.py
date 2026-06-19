@@ -6,11 +6,18 @@
 
 from __future__ import annotations
 
+import json
 import os
 
 from fastapi import FastAPI, Header, Request, Response
 
-from pysibs import SIBSClient, parse_webhook, verify_webhook_signature
+from pysibs import (
+    SIBSClient,
+    SIBSInvalidWebhookSignature,
+    build_acknowledgement,
+    decrypt_webhook,
+    parse_webhook,
+)
 
 app = FastAPI(title="PySIBS FastAPI example")
 
@@ -39,18 +46,27 @@ async def payment_status(payment_id: str) -> dict[str, object]:
 @app.post("/webhooks/sibs")
 async def sibs_webhook(
     request: Request,
-    x_sibs_signature: str | None = Header(default=None),
+    x_initialization_vector: str = Header(...),
+    x_authentication_tag: str = Header(...),
 ) -> Response:
     raw_body = await request.body()
-    secret = os.environ.get("SIBS_WEBHOOK_SECRET", "")
+    secret = os.environ["SIBS_WEBHOOK_SECRET"]
 
-    # Confirm SIBS' real signing scheme before relying on this in production.
-    if secret and not verify_webhook_signature(raw_body, x_sibs_signature, secret=secret):
-        return Response(status_code=400, content="invalid signature")
+    # SIBS encrypts the body with AES-GCM; decrypt it before trusting the payload.
+    try:
+        data = decrypt_webhook(
+            body=raw_body,
+            iv=x_initialization_vector,
+            auth_tag=x_authentication_tag,
+            secret=secret,
+        )
+    except SIBSInvalidWebhookSignature:
+        return Response(status_code=400, content="invalid payload")
 
-    event = parse_webhook(raw_body)
+    event = parse_webhook(data)
     # ... update your order using event.payment_id / event.status ...
     print("webhook:", event.payment_id, event.status)
 
-    # Respond 200 quickly so SIBS does not retry unnecessarily.
-    return Response(status_code=200)
+    # Acknowledge with HTTP 200 so SIBS does not retry unnecessarily.
+    return Response(status_code=200, content=json.dumps(build_acknowledgement(event)),
+                    media_type="application/json")

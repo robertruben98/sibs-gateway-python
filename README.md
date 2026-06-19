@@ -14,10 +14,11 @@ FastAPI, Flask, Celery, CLI scripts — anywhere Python runs.
 ## Features
 
 - Synchronous (`SIBSClient`) and asynchronous (`AsyncSIBSClient`) clients
-- Create payments, check status, refund, capture and cancel
+- Create payments (purchase or pre-authorization), check status, refund, capture, cancel
+- MB WAY purchase flow and MULTIBANCO reference parsing
+- AES-GCM webhook decryption + acknowledgement helper (the scheme SIBS actually uses)
 - Typed Pydantic models with normalized statuses (`PaymentStatus`)
 - Safe money handling with `Decimal` (floats are rejected)
-- Webhook parsing and configurable signature verification
 - A clear exception hierarchy — raw `httpx` errors never leak out
 - Fully typed (`py.typed`), `ruff` + `mypy --strict` clean
 
@@ -25,6 +26,9 @@ FastAPI, Flask, Celery, CLI scripts — anywhere Python runs.
 
 ```bash
 pip install pysibs
+
+# For AES-GCM webhook decryption (pulls in `cryptography`):
+pip install "pysibs[webhooks]"
 ```
 
 Requires Python 3.10+.
@@ -91,9 +95,41 @@ client.refund_payment(payment_id="payment_123", amount="10.00", merchant_refund_
 
 ## Capture & cancel
 
+Create a pre-authorization, then capture (or cancel) it later:
+
 ```python
-client.capture_payment(payment_id="payment_123", amount="25.50")
-client.cancel_payment("payment_123")
+auth = client.create_payment(
+    amount="25.50", merchant_transaction_id="ORDER-1", transaction_type="AUTH"
+)
+client.capture_payment(payment_id=auth.id, amount="25.50")
+# or release it:
+client.cancel_payment(auth.id)
+```
+
+## MB WAY
+
+After creating a payment with the `MBWAY` method, trigger the purchase with the
+shopper's phone (the result arrives via webhook):
+
+```python
+payment = client.create_payment(
+    amount="10.00", merchant_transaction_id="ORDER-2", payment_methods=["MBWAY"]
+)
+client.pay_with_mbway(
+    payment_id=payment.id,
+    transaction_signature=payment.signature,
+    customer_phone="351#911234567",
+)
+```
+
+## MULTIBANCO reference
+
+```python
+payment = client.create_payment(
+    amount="25.50", merchant_transaction_id="ORDER-3", payment_methods=["REFERENCE"]
+)
+ref = payment.payment_reference
+print(ref.entity, ref.reference, ref.expire_date)  # show these to the shopper
 ```
 
 ## Async usage
@@ -107,23 +143,27 @@ async with AsyncSIBSClient.from_env() as client:
 
 ## Webhooks
 
+SIBS **encrypts** webhook bodies with AES-GCM (it does not sign them). Decrypt, parse,
+then acknowledge with HTTP 200 so SIBS stops retrying:
+
 ```python
-from pysibs import parse_webhook, verify_webhook_signature
+from pysibs import decrypt_webhook, parse_webhook, build_acknowledgement
 
-event = parse_webhook(raw_body)         # bytes, str or dict
-print(event.payment_id, event.status, event.raw_payload)
-
-is_valid = verify_webhook_signature(
-    payload=raw_body,
-    signature=request.headers.get("X-SIBS-Signature"),
-    secret="webhook_secret",
+data = decrypt_webhook(
+    body=raw_body,                                   # base64 ciphertext (request body)
+    iv=request.headers["X-Initialization-Vector"],
+    auth_tag=request.headers["X-Authentication-Tag"],
+    secret=WEBHOOK_SECRET_KEY,                        # from the SIBS Backoffice
 )
+event = parse_webhook(data)
+print(event.payment_id, event.status, event.payment_reference)
+
+ack = build_acknowledgement(event)   # return this JSON with HTTP 200
 ```
 
-SIBS' webhook signing scheme is not uniformly documented and may differ per
-product/environment. `verify_webhook_signature` defaults to HMAC-SHA256, but you can
-pass a custom `verifier` callable that matches whatever SIBS actually uses for your
-integration. **Always confirm the scheme against the official documentation.**
+Requires `pip install "pysibs[webhooks]"`. See [docs/webhooks.md](docs/webhooks.md) for
+details. The legacy `verify_webhook_signature()` helper remains for custom schemes but
+SIBS Gateway does not use HMAC.
 
 ## Error handling
 
@@ -183,8 +223,10 @@ Tested on CPython 3.10, 3.11, 3.12 and 3.13.
 ## Roadmap
 
 - `0.1.0` — `SIBSClient`/`AsyncSIBSClient`, create/status/refund/capture/cancel,
-  webhook parsing + verification, typed models, docs.
-- `0.2.0` — richer payment-method specific models (MB WAY, MULTIBANCO references).
+  webhook parsing, typed models, docs.
+- `0.2.0` — AES-GCM webhook decryption + acknowledgement, MB WAY purchase flow,
+  MULTIBANCO reference parsing, `AUTH`/`PURS` transaction types. ✅
+- `0.3.0` — card server-to-server / 3DS flow, more payment-method models.
 - `1.0.0` — stable API once the SIBS contract is fully confirmed end-to-end.
 
 ## Contributing

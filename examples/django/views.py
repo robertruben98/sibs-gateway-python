@@ -12,7 +12,13 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-from pysibs import SIBSClient, parse_webhook, verify_webhook_signature
+from pysibs import (
+    SIBSClient,
+    SIBSInvalidWebhookSignature,
+    build_acknowledgement,
+    decrypt_webhook,
+    parse_webhook,
+)
 
 # A module-level client is fine; it is safe to share across requests.
 client = SIBSClient.from_env()
@@ -41,17 +47,22 @@ def payment_status(request: HttpRequest, payment_id: str) -> JsonResponse:
 @csrf_exempt
 @require_POST
 def sibs_webhook(request: HttpRequest) -> HttpResponse:
-    raw_body = request.body
-    signature = request.headers.get("X-SIBS-Signature")
-    secret = getattr(settings, "SIBS_WEBHOOK_SECRET", "")
+    secret = settings.SIBS_WEBHOOK_SECRET
 
-    # Confirm SIBS' real signing scheme before relying on this in production.
-    if secret and not verify_webhook_signature(raw_body, signature, secret=secret):
-        return HttpResponse("invalid signature", status=400)
+    # SIBS encrypts the body with AES-GCM; decrypt it before trusting the payload.
+    try:
+        data = decrypt_webhook(
+            body=request.body,
+            iv=request.headers["X-Initialization-Vector"],
+            auth_tag=request.headers["X-Authentication-Tag"],
+            secret=secret,
+        )
+    except SIBSInvalidWebhookSignature:
+        return HttpResponse("invalid payload", status=400)
 
-    event = parse_webhook(raw_body)
+    event = parse_webhook(data)
     # ... update your order using event.payment_id / event.status ...
     print("sibs webhook:", event.payment_id, event.status)
 
-    # Respond 200 quickly so SIBS does not retry unnecessarily.
-    return HttpResponse(status=200)
+    # Acknowledge with HTTP 200 so SIBS does not retry unnecessarily.
+    return JsonResponse(build_acknowledgement(event))

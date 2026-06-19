@@ -17,9 +17,11 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Any
 
-from .enums import normalize_payment_status
+from .enums import TransactionType, normalize_payment_status
 from .models import (
+    MBWayResponse,
     OperationResponse,
+    PaymentReference,
     PaymentRequest,
     PaymentResponse,
     PaymentStatusResponse,
@@ -46,6 +48,7 @@ def prepare_payment_request(
     return_url: str | None,
     cancel_url: str | None,
     payment_methods: list[str] | None,
+    transaction_type: str | TransactionType,
     require_https: bool,
 ) -> PaymentRequest:
     """Validate raw create_payment inputs and return a :class:`PaymentRequest`."""
@@ -54,6 +57,7 @@ def prepare_payment_request(
         amount=normalize_amount(amount, normalized_currency),
         currency=normalized_currency,
         merchant_transaction_id=validate_merchant_transaction_id(merchant_transaction_id),
+        transaction_type=TransactionType.coerce(transaction_type).value,
         description=description,
         return_url=validate_url(return_url, require_https=require_https) if return_url else None,
         cancel_url=validate_url(cancel_url, require_https=require_https) if cancel_url else None,
@@ -135,13 +139,41 @@ def _extract_redirect_url(data: JSONDict) -> str | None:
     return None
 
 
+def _extract_payment_reference(data: JSONDict) -> PaymentReference | None:
+    """Parse a ``paymentReference`` object (MULTIBANCO), if present."""
+    ref = data.get("paymentReference")
+    if not isinstance(ref, dict) or not ref:
+        return None
+
+    amount = ref.get("amount")
+    amount_value: Decimal | None = None
+    currency: str | None = None
+    if isinstance(amount, dict):
+        raw_value = amount.get("value")
+        if raw_value is not None:
+            try:
+                amount_value = Decimal(str(raw_value))
+            except (ValueError, ArithmeticError):
+                amount_value = None
+        currency = amount.get("currency")
+
+    return PaymentReference(
+        entity=str(ref["entity"]) if ref.get("entity") is not None else None,
+        reference=str(ref["reference"]) if ref.get("reference") is not None else None,
+        amount=amount_value,
+        currency=currency,
+        expire_date=ref.get("expireDate") or ref.get("expirationDate") or ref.get("expiryDate"),
+        raw=ref,
+    )
+
+
 def build_create_payment_payload(req: PaymentRequest, terminal_id: str) -> JSONDict:
     """Build the create-payment request body from a validated :class:`PaymentRequest`."""
     transaction: JSONDict = {
         "transactionTimestamp": datetime.now(timezone.utc).isoformat(),
         "description": req.description or req.merchant_transaction_id,
         "moto": False,
-        "paymentType": "PURS",
+        "paymentType": req.transaction_type,
         "amount": _amount_obj(req.amount, req.currency),
     }
     if req.payment_methods:
@@ -173,6 +205,7 @@ def parse_create_payment_response(data: JSONDict) -> PaymentResponse:
         raw_status=raw_status,
         redirect_url=_extract_redirect_url(data),
         signature=data.get("transactionSignature") or data.get("signature"),
+        payment_reference=_extract_payment_reference(data),
         raw_response=data,
     )
 
@@ -183,6 +216,7 @@ def parse_status_response(data: JSONDict, payment_id: str) -> PaymentStatusRespo
         payment_id=_extract_id(data) or payment_id,
         status=normalized,
         raw_status=raw_status,
+        payment_reference=_extract_payment_reference(data),
         raw_response=data,
     )
 
@@ -210,6 +244,24 @@ def parse_refund_response(data: JSONDict, payment_id: str) -> RefundResponse:
 def parse_operation_response(data: JSONDict, payment_id: str) -> OperationResponse:
     raw_status, normalized = _normalize(data)
     return OperationResponse(
+        payment_id=_extract_id(data) or payment_id,
+        status=normalized,
+        raw_status=raw_status,
+        raw_response=data,
+    )
+
+
+def build_mbway_payload(customer_phone: str) -> JSONDict:
+    """Build the MB WAY purchase request body.
+
+    SIBS expects the phone as ``"<countryCode>#<number>"`` (e.g. ``"351#911234567"``).
+    """
+    return {"customerPhone": customer_phone}
+
+
+def parse_mbway_response(data: JSONDict, payment_id: str) -> MBWayResponse:
+    raw_status, normalized = _normalize(data)
+    return MBWayResponse(
         payment_id=_extract_id(data) or payment_id,
         status=normalized,
         raw_status=raw_status,

@@ -1,31 +1,35 @@
 # Internal notes — SIBS Gateway assumptions
 
-This file tracks the assumptions PySIBS makes about the SIBS Gateway API and the points
-that must be confirmed against the **current official documentation** before treating
-any function as production-stable. No credentials or private data belong here.
+This file tracks what PySIBS assumes about the SIBS Gateway API and what has been
+verified against the official documentation (`docs.pay.sibs.com`). No credentials or
+private data belong here.
 
-## Status: to be verified
+## Verified (docs.pay.sibs.com, reviewed 2026-06)
 
-| Area | Current assumption (in code) | Must confirm |
+| Area | Confirmed behaviour | In code |
 | --- | --- | --- |
-| Base URLs | `api.qly.sibspayments.com/sibs/spg/v2` (sandbox), `api.sibspayments.com/sibs/spg/v2` (production) — `pysibs/config.py` | Exact hosts/paths and API version segment. |
-| Auth | `Authorization: Bearer <api_key>`, optional `X-IBM-Client-Id: <client_id>` — `pysibs/_http.py` | Whether the client-id header is required and its exact name. |
-| Create payment | `POST /payments` with `merchant` + `transaction` objects — `pysibs/_payloads.py` | Exact required fields, `paymentType`, amount encoding, URLs object. |
-| Status | `GET /payments/{id}/status` | Exact path and response shape. |
-| Refund | `POST /payments/{id}/refund` | Path and body (amount object, merchant ref field name). |
-| Capture | `POST /payments/{id}/capture` | Path and body. |
-| Cancel/void | `POST /payments/{id}/cancellation` | Path and body. |
-| Status vocabulary | mapping table in `pysibs/enums.py` | Real status tokens / return codes per endpoint. |
-| Webhook fields | keys tried in `pysibs/webhooks.py` (`transactionID`, `paymentStatus`, ...) | Real notification payload shape. |
-| Webhook signature | HMAC-SHA256 default, configurable verifier | Whether/which signature SIBS sends and the algorithm. |
-| Idempotency | no header sent by default — `pysibs/idempotency.py` | Whether a dedicated idempotency header exists. |
+| Base URLs | `api.qly.sibspayments.com` (quality/sandbox), `api.sibspayments.com` (production); path prefix `/sibs/spg/v2` | `config.py` ✅ |
+| Auth | `Authorization: Bearer {token}` + `X-IBM-Client-Id: {clientId}` | `_http.py` ✅ |
+| Create payment | `POST /payments` with `merchant{terminalId,channel,merchantTransactionId}` + `transaction{transactionTimestamp,description,moto,paymentType,amount{value,currency}}` + `paymentMethod[]` | `_payloads.py` ✅ |
+| Payment type | `PURS` (purchase) / `AUTH` (pre-authorization) | `TransactionType` ✅ |
+| Status / refund / capture / cancel | `GET /payments/{id}/status`, `POST /payments/{id}/refund`, `/capture`, `/cancellation` | clients ✅ |
+| Payment method value | MULTIBANCO reference uses `"REFERENCE"` | `PaymentMethod` ✅ |
+| MB WAY | 2-step: create checkout → `POST /payments/{id}/mbway-id/purchase` with `customerPhone:"351#9XXXXXXXX"` and `Authorization: Digest {transactionSignature}` | `pay_with_mbway` ✅ |
+| Webhooks | Body **AES-GCM encrypted** (not HMAC); headers `X-Initialization-Vector`, `X-Authentication-Tag`, base64 body; ack with HTTP 200 + `{statusCode,statusMsg,notificationID}` | `webhooks.py` ✅ |
+| Webhook payload | `returnStatus{statusCode,statusMsg}`, `paymentStatus`, `paymentMethod`, `transactionID`, `amount{value,currency}`, `merchant{transactionId,terminalId,merchantName}`, `notificationID`, `paymentReference` | `parse_webhook` ✅ |
+
+## Still to confirm
+
+| Area | Current assumption | To verify |
+| --- | --- | --- |
+| Webhook secret encoding | AES key = UTF-8 bytes of the Backoffice secret (16/24/32 bytes) | Exact key format/encoding SIBS expects. |
+| `paymentReference` fields | `entity`, `reference`, `amount{value,currency}`, `expireDate` | Exact field names across products. |
+| Idempotency | No header sent by default (`idempotency.py`) | Whether a dedicated idempotency header exists. |
+| Card S2S flow | Not implemented | Full card form-context / 3DS flow (PCI scope). |
 
 ## Design guardrails
 
-- Wire format is isolated in `pysibs/_payloads.py`; base URLs in `pysibs/config.py`.
-  Adjust there once the contract is confirmed — clients don't change.
-- Every response model preserves `raw_response` / `raw_payload`, so callers can reach
-  any field PySIBS hasn't normalized.
+- Wire format isolated in `_payloads.py`; base URLs in `config.py`.
+- Every response model preserves `raw_response` / `raw_payload`.
 - Unknown statuses map to `PaymentStatus.UNKNOWN`; parsing never raises on them.
-- Never invent endpoints, fields or headers. When unsure, keep the interface flexible,
-  add a `NOTE`, and don't advertise the function as stable.
+- Never invent endpoints, fields or headers; when unsure, keep it flexible and add a `NOTE`.
