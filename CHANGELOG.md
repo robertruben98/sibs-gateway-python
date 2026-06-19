@@ -6,6 +6,37 @@ All notable changes to this project are documented here. This project adheres to
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-06-19
+
+Contract hardening from a fresh verification against the official SIBS documentation
+(`docs.pay.sibs.com`). Corrects several details that were previously assumptions; see
+`docs/internal-notes.md`.
+
+### Fixed
+- **Webhook decryption key (breaking).** The SIBS Backoffice secret is a **base64**
+  string and must be base64-*decoded* to obtain the raw AES key (confirmed across the
+  official Python/Java/C#/PHP samples). `decrypt_webhook` previously used the UTF-8 bytes
+  of the secret, which could not decrypt real SIBS webhooks. A `str` secret is now
+  base64-decoded; pass `bytes` to supply an already-decoded raw key.
+- **Card / token endpoint paths.** `pay_with_card` now defaults to `card/purchase` (was
+  `card-id/purchase`) and `pay_with_token` to `token/purchase` (was `card-id/purchase`),
+  matching the documented endpoints. Both remain overridable via `path=`.
+
+### Changed
+- **Token response parsing.** `CardPaymentResponse.token` now also reads the documented
+  `tokenList[]` shape (`value` / `expireDate` / `maskedPAN`) in addition to the previous
+  `token` object/string forms.
+- **3D-Secure model.** Documented that 3DS is not a separate endpoint — browser/device
+  data is sent under `info.deviceInfo` in the `card/purchase` request; `build_browser_data`
+  and `docs/cards.md` now reflect the confirmed `cardInfo{PAN, secureCode, validationDate,
+  cardholderName, createToken}` body and the `actionResponse` challenge shape.
+
+### Notes
+- Idempotency: confirmed SIBS documents no idempotency header — the existing behaviour
+  (send nothing unless a header name is configured) was already correct.
+- Still unconfirmed (tracked in `docs/internal-notes.md`): v1/v2 `merchantInitiatedTransaction`
+  enum names, the 3DS resubmit body, and the documented AES key bit-length.
+
 ## [0.7.0] - 2026-06-19
 
 Delivers the roadmap's reliability (0.6.0) and observability/security (0.7.0) scope.
@@ -108,7 +139,8 @@ Grounded in a review of the official SIBS Gateway documentation
 - Full exception hierarchy under `SIBSError`; raw `httpx` errors never leak.
 - Documentation, examples (Django/FastAPI), CI and PyPI publish workflows.
 
-[Unreleased]: https://github.com/robertruben98/pysibs/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/robertruben98/pysibs/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/robertruben98/pysibs/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/robertruben98/pysibs/compare/v0.4.0...v0.7.0
 [0.4.0]: https://github.com/robertruben98/pysibs/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/robertruben98/pysibs/compare/v0.2.0...v0.3.0

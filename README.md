@@ -157,7 +157,9 @@ payment = client.create_payment(
 result = client.pay_with_card(
     payment_id=payment.id,
     transaction_signature=payment.signature,
-    card={"card": {"number": "...", "expiry": "MM/YY", "cvv": "..."}},  # opaque
+    # opaque body; confirmed shape is cardInfo{PAN, secureCode, validationDate, ...}
+    card={"cardInfo": {"PAN": "...", "secureCode": "...",
+                       "validationDate": "2030-12-31T00:00:00.000Z"}},
 )
 if result.requires_3ds:
     from pysibs import render_3ds_redirect_html
@@ -263,8 +265,11 @@ ambiguity, PySIBS:
 2. preserves the full `raw_response` / `raw_payload` on every model;
 3. never sends undocumented headers (e.g. idempotency — see `pysibs/idempotency.py`).
 
-Before going to production, verify the endpoints, payloads and webhook signature
-scheme against the current official SIBS documentation.
+As of `0.8.0` the core contract (webhook key, card/token endpoints, `tokenList`, the
+`cardInfo`/3DS shape) is verified against the official docs; the few details still open
+(MIT enums, the 3DS resubmit body, the AES key bit-length) are tracked in
+[docs/internal-notes.md](docs/internal-notes.md). Before going to production, verify the
+endpoints, payloads and webhook scheme against the current official SIBS documentation.
 
 ## Python compatibility
 
@@ -278,7 +283,12 @@ Tested on CPython 3.10, 3.11, 3.12 and 3.13.
   MULTIBANCO reference parsing, `AUTH`/`PURS` transaction types. ✅
 - `0.3.0` — card server-to-server (opaque payload) + 3D-Secure redirect handling. ✅
 - `0.4.0` — card tokenization, token / recurring payments, 3DS browser-data helper. ✅
-- `1.0.0` — stable API once the SIBS contract is fully confirmed end-to-end.
+- `0.6.0` — payment-safe retries with backoff, rate-limit (`429`) + granular timeouts. ✅
+- `0.7.0` — credential-safe logging, PAN redaction, webhook deduplication. ✅
+- `0.8.0` — contract hardening vs official docs: base64 webhook key, correct
+  card/token endpoint paths, `tokenList` parsing, confirmed 3DS/`cardInfo` shape. ✅
+- `1.0.0` — stable API once the remaining SIBS contract details (MIT enums, 3DS
+  resubmit body, AES key bit-length) are confirmed end-to-end.
 
 ## Contributing
 

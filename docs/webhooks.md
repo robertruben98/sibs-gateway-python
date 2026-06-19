@@ -28,7 +28,7 @@ data = decrypt_webhook(
     body=raw_body,                                  # base64 ciphertext (request body)
     iv=request.headers["X-Initialization-Vector"],
     auth_tag=request.headers["X-Authentication-Tag"],
-    secret=WEBHOOK_SECRET_KEY,                       # from the SIBS Backoffice (16/24/32 bytes)
+    secret=WEBHOOK_SECRET_KEY,                       # base64 secret from the SIBS Backoffice
 )
 
 event = parse_webhook(data)
@@ -64,5 +64,6 @@ ack = build_acknowledgement(event)   # {"statusCode": "200", "statusMsg": "Succe
 schemes, but the SIBS Gateway does not use HMAC — prefer `decrypt_webhook` for SIBS
 Gateway notifications.
 
-> Always confirm the exact secret-key encoding and header names for your integration
-> against the official SIBS documentation.
+> The Backoffice secret is a **base64 string**: PySIBS base64-decodes it to the raw AES
+> key (matching SIBS' official Python/Java/C#/PHP samples). Pass the secret string as-is;
+> pass `bytes` only if you have already decoded the key yourself.

@@ -32,16 +32,16 @@ def build_browser_data(
     java_enabled: bool = False,
     javascript_enabled: bool = True,
 ) -> dict[str, Any]:
-    """Assemble the EMVCo 3DS browser data collected from the shopper's browser.
+    """Assemble the 3DS browser data collected from the shopper's browser.
 
-    Returns a dict with the standard EMV 3DS field names. 3DS requires this device
-    information for the authentication request; collect the values client-side (the
-    ``Accept``/``User-Agent`` headers server-side) and include the result in your 3DS
-    payload for :meth:`~pysibs.client.SIBSClient.submit_3ds`.
+    Returns a dict with the ``browser*`` field names SIBS uses. 3DS requires this device
+    information; collect the values client-side (the ``Accept``/``User-Agent`` headers
+    server-side). Per the official docs, place the result under ``info.deviceInfo`` in the
+    ``card/purchase`` request body (the same call as
+    :meth:`~pysibs.client.SIBSClient.pay_with_card`) — 3DS is not a separate endpoint.
+    For example::
 
-    .. note::
-       Field names follow the EMVCo 3DS spec. Confirm the exact nesting SIBS expects
-       for your integration and adjust before relying on it in production.
+        body = {"cardInfo": {...}, "info": {"deviceInfo": build_browser_data(...)}}
     """
     return {
         "browserAcceptHeader": accept_header,
@@ -78,13 +78,13 @@ def render_3ds_redirect_html(action: ActionResponse, *, auto_submit: bool = True
         f'    <input type="hidden" name="{escape(str(name))}" value="{escape(str(value))}">'
         for name, value in redirect["fields"].items()
     )
-    onload = " onload=\"document.forms[0].submit()\"" if auto_submit else ""
+    onload = ' onload="document.forms[0].submit()"' if auto_submit else ""
     return (
         "<!DOCTYPE html>\n"
         f"<html>\n<body{onload}>\n"
         f'  <form method="{escape(redirect["method"])}" action="{escape(redirect["url"])}">\n'
         f"{inputs}\n"
-        "    <noscript><button type=\"submit\">Continue</button></noscript>\n"
+        '    <noscript><button type="submit">Continue</button></noscript>\n'
         "  </form>\n"
         "</body>\n</html>"
     )

@@ -17,13 +17,16 @@ from pysibs import (
     parse_webhook,
 )
 
-# A 32-byte (256-bit) key, as configured in the SIBS Backoffice.
-KEY = "0123456789abcdef0123456789abcdef"
+# SIBS stores the webhook secret as a base64 string; the raw AES key is its base64
+# decode. RAW_KEY is the 32-byte (256-bit) key; SECRET is what a merchant copies from the
+# Backoffice and passes to decrypt_webhook.
+RAW_KEY = b"0123456789abcdef0123456789abcdef"
+SECRET = base64.b64encode(RAW_KEY).decode()
 
 
-def _encrypt(plaintext: bytes, key: str = KEY) -> tuple[str, str, str]:
+def _encrypt(plaintext: bytes, key: bytes = RAW_KEY) -> tuple[str, str, str]:
     """Return (body_b64, iv_b64, tag_b64) the way SIBS sends them."""
-    aesgcm = AESGCM(key.encode())
+    aesgcm = AESGCM(key)
     nonce = b"123456789012"  # 12-byte nonce
     ct_and_tag = aesgcm.encrypt(nonce, plaintext, None)
     ciphertext, tag = ct_and_tag[:-16], ct_and_tag[-16:]
@@ -53,13 +56,13 @@ SAMPLE = {
 
 def test_decrypt_webhook_roundtrip() -> None:
     body, iv, tag = _encrypt(json.dumps(SAMPLE).encode())
-    data = decrypt_webhook(body, iv, tag, KEY)
+    data = decrypt_webhook(body, iv, tag, SECRET)
     assert data["transactionID"] == "s24587y857mtjgnbt"
 
 
 def test_decrypt_then_parse() -> None:
     body, iv, tag = _encrypt(json.dumps(SAMPLE).encode())
-    event = parse_webhook(decrypt_webhook(body, iv, tag, KEY))
+    event = parse_webhook(decrypt_webhook(body, iv, tag, SECRET))
     assert event.payment_id == "s24587y857mtjgnbt"
     assert event.merchant_transaction_id == "ORD-55"  # nested merchant.transactionId
     assert event.notification_id == "20273954-0540-4bd3-8e01-234eds234cds"
@@ -80,7 +83,7 @@ def test_decrypt_tampered_ciphertext_raises() -> None:
     body, iv, tag = _encrypt(json.dumps(SAMPLE).encode())
     tampered = base64.b64encode(b"\x00" + base64.b64decode(body)[1:]).decode()
     with pytest.raises(SIBSInvalidWebhookSignature):
-        decrypt_webhook(tampered, iv, tag, KEY)
+        decrypt_webhook(tampered, iv, tag, SECRET)
 
 
 def test_decrypt_invalid_key_length() -> None:
@@ -91,19 +94,19 @@ def test_decrypt_invalid_key_length() -> None:
 
 def test_decrypt_invalid_base64() -> None:
     with pytest.raises(SIBSValidationError):
-        decrypt_webhook("not base64!!", "also bad", "nope", KEY)
+        decrypt_webhook("not base64!!", "also bad", "nope", SECRET)
 
 
 def test_decrypt_no_parse_returns_raw_text() -> None:
     body, iv, tag = _encrypt(b"plain text not json")
-    data = decrypt_webhook(body, iv, tag, KEY, parse=False)
+    data = decrypt_webhook(body, iv, tag, SECRET, parse=False)
     assert data == {"raw": "plain text not json"}
 
 
 def test_decrypt_non_json_with_parse_raises() -> None:
     body, iv, tag = _encrypt(b"plain text not json")
     with pytest.raises(SIBSValidationError):
-        decrypt_webhook(body, iv, tag, KEY)
+        decrypt_webhook(body, iv, tag, SECRET)
 
 
 def test_build_acknowledgement_from_event() -> None:

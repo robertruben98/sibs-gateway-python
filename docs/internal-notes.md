@@ -21,18 +21,20 @@ private data belong here.
 | Recurring / MIT | initial recurring (cardholder present) vs following (merchant-initiated) via stored token | `pay_with_token` (opaque) ✅ |
 | Webhooks | Body **AES-GCM encrypted** (not HMAC); headers `X-Initialization-Vector`, `X-Authentication-Tag`, base64 body; ack with HTTP 200 + `{statusCode,statusMsg,notificationID}` | `webhooks.py` ✅ |
 | Webhook payload | `returnStatus{statusCode,statusMsg}`, `paymentStatus`, `paymentMethod`, `transactionID`, `amount{value,currency}`, `merchant{transactionId,terminalId,merchantName}`, `notificationID`, `paymentReference` | `parse_webhook` ✅ |
+| Webhook secret | AES key = **base64-decode of the Backoffice secret** (official Python/Java/C#/PHP samples all `base64.b64decode` it); raw key 16/24/32 bytes | `_coerce_key` ✅ |
+| `paymentReference` fields | `entity`, `reference`, `amount{value,currency}`; expiry is `expireDate` (sync API) or `expiryDate` (webhook); webhook also has `paymentEntity`/`status` | `_extract_payment_reference` (accepts both) ✅ |
+| Idempotency | No idempotency header documented; none sent | `idempotency.py` ✅ |
+| Card endpoint + fields | `POST payments/{id}/card/purchase`; body `cardInfo{PAN, secureCode, validationDate (ISO-8601), cardholderName, createToken}`; `Authorization: Digest` + `X-IBM-Client-Id` | path in `client.py` ✅; body opaque (caller builds) |
+| Token charge | `POST payments/{id}/token/purchase`; body `tokenInfo{value, tokenType, secureCode}`; response token in `tokenList[]{value, expireDate, maskedPAN}` | path + `_extract_card_token` ✅; charge body opaque |
+| 3DS | **No separate endpoint** — browser/device data goes under `info.deviceInfo` in the `card/purchase` request; `Partial` → `actionResponse{type:"THREEDS_CHALLENGE", id, data{url,params}}` | `build_browser_data`, `_extract_action_response` ✅ |
 
 ## Still to confirm
 
 | Area | Current assumption | To verify |
 | --- | --- | --- |
-| Webhook secret encoding | AES key = UTF-8 bytes of the Backoffice secret (16/24/32 bytes) | Exact key format/encoding SIBS expects. |
-| `paymentReference` fields | `entity`, `reference`, `amount{value,currency}`, `expireDate` | Exact field names across products. |
-| Idempotency | No header sent by default (`idempotency.py`) | Whether a dedicated idempotency header exists. |
-| Card request fields | Opaque payload (caller builds body); not modelled | Exact card field names (cardInfo/cardNumber/cvv/...). |
-| Card / 3DS endpoint paths | Defaults `card-id/purchase`, `card-id/3ds` (overridable via `path=`) | Exact paths and the 3DS request body (browser data). |
-| Token / recurring fields | Opaque `pay_with_token` payload; token parsed flexibly | Exact token reference + initial/following recurring (MIT) field names. |
-| 3DS browser data | EMVCo-standard names (`build_browser_data`) | Exact nesting/names SIBS expects. |
+| AES key bit-length | Length inferred from decoded secret (16/24/32) | Whether the Backoffice secret is documented as a fixed 128/256-bit key. |
+| Token/recurring schema | Opaque payload; docs show `merchantInitiatedTransaction.type` (`UCOF`), follow-ups `POST .../{id}/recurring` | v1 (`recurringTransaction`) vs v2 (`merchantInitiatedTransaction`) field names; literal `RCRR` enum (needs authenticated sandbox swagger). |
+| 3DS resubmit | `submit_3ds` posts an opaque body to an overridable path | Exact body/endpoint to resubmit after the 3DS challenge (incl. `actionResponse.id` wrapping). |
 
 ## Design guardrails
 

@@ -36,7 +36,7 @@ ACTION_RESPONSE = {
 
 @respx.mock
 def test_pay_with_card_success(client: SIBSClient) -> None:
-    route = respx.post(f"{BASE}/payments/tx_1/card-id/purchase").mock(
+    route = respx.post(f"{BASE}/payments/tx_1/card/purchase").mock(
         return_value=httpx.Response(200, json={"transactionID": "tx_1", "paymentStatus": "Success"})
     )
     result = client.pay_with_card(
@@ -51,7 +51,7 @@ def test_pay_with_card_success(client: SIBSClient) -> None:
 
 @respx.mock
 def test_pay_with_card_requires_3ds(client: SIBSClient) -> None:
-    respx.post(f"{BASE}/payments/tx_1/card-id/purchase").mock(
+    respx.post(f"{BASE}/payments/tx_1/card/purchase").mock(
         return_value=httpx.Response(200, json=ACTION_RESPONSE)
     )
     result = client.pay_with_card(
@@ -67,7 +67,7 @@ def test_pay_with_card_requires_3ds(client: SIBSClient) -> None:
 
 @respx.mock
 def test_pay_with_card_declined(client: SIBSClient) -> None:
-    respx.post(f"{BASE}/payments/tx_1/card-id/purchase").mock(
+    respx.post(f"{BASE}/payments/tx_1/card/purchase").mock(
         return_value=httpx.Response(200, json={"paymentStatus": "Declined"})
     )
     result = client.pay_with_card(payment_id="tx_1", transaction_signature="s", card=CARD)
@@ -87,7 +87,7 @@ def test_pay_with_card_requires_signature(client: SIBSClient) -> None:
 
 @respx.mock
 def test_submit_3ds(client: SIBSClient) -> None:
-    route = respx.post(f"{BASE}/payments/tx_1/card-id/3ds").mock(
+    route = respx.post(f"{BASE}/payments/tx_1/card/purchase").mock(
         return_value=httpx.Response(200, json={"transactionID": "tx_1", "paymentStatus": "Success"})
     )
     result = client.submit_3ds(
@@ -110,7 +110,7 @@ def test_pay_with_card_custom_path(client: SIBSClient) -> None:
 
 @respx.mock
 async def test_async_pay_with_card() -> None:
-    respx.post(f"{BASE}/payments/tx_a/card-id/purchase").mock(
+    respx.post(f"{BASE}/payments/tx_a/card/purchase").mock(
         return_value=httpx.Response(200, json=ACTION_RESPONSE)
     )
     async with AsyncSIBSClient(api_key="k", terminal_id="t", base_url=BASE) as client:

@@ -283,26 +283,33 @@ def _extract_action_response(data: JSONDict) -> ActionResponse | None:
 
 
 def _extract_card_token(data: JSONDict) -> CardToken | None:
-    """Parse a stored-card token from a card response, if present."""
-    token = data.get("token")
+    """Parse a stored-card token from a card response, if present.
+
+    Per the official docs a successful tokenizing card payment returns the token under
+    ``tokenList`` (an array of ``{value, expireDate, maskedPAN, tokenType}``); older /
+    other shapes use a top-level ``token`` (string or object). All are accepted.
+    """
+    token: Any = data.get("token")
     if isinstance(token, str):
         return CardToken(value=token, raw={"token": token})
     if not isinstance(token, dict):
-        # Some responses nest it under a tokenisation/tokenInfo object.
-        for key in ("tokenisation", "tokenInfo", "tokenisationResponse"):
-            candidate = data.get(key)
-            if isinstance(candidate, dict):
-                token = candidate
-                break
+        # Preferred shape: tokenList[] (first entry).
+        token_list = data.get("tokenList")
+        if isinstance(token_list, list) and token_list and isinstance(token_list[0], dict):
+            token = token_list[0]
+        else:
+            # Some responses nest it under a tokenisation/tokenInfo object.
+            for key in ("tokenisation", "tokenInfo", "tokenisationResponse"):
+                candidate = data.get(key)
+                if isinstance(candidate, dict):
+                    token = candidate
+                    break
     if not isinstance(token, dict) or not token:
         return None
 
     return CardToken(
         value=(
-            token.get("value")
-            or token.get("token")
-            or token.get("tokenValue")
-            or token.get("id")
+            token.get("value") or token.get("token") or token.get("tokenValue") or token.get("id")
         ),
         expiry=token.get("expiry") or token.get("expireDate") or token.get("expirationDate"),
         masked_pan=token.get("maskedPan") or token.get("maskedPAN") or token.get("cardMasked"),
