@@ -9,6 +9,7 @@ handle specific cases.
 | `SIBSValidationError` | Local input validation fails (float amount, empty id, bad URL). |
 | `SIBSAuthenticationError` | SIBS rejects credentials (HTTP 401/403). |
 | `SIBSAPIError` | Other API errors; carries `status_code` and `response_body`. |
+| `SIBSRateLimitError` | HTTP 429 (subclass of `SIBSAPIError`); carries `retry_after`. |
 | `SIBSTimeoutError` | Request times out, or HTTP 408. |
 | `SIBSConnectionError` | SIBS unreachable (DNS/TCP/TLS). |
 | `SIBSInvalidWebhookSignature` | Webhook signature verification fails (with `raise_on_failure=True`). |

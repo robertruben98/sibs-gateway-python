@@ -15,6 +15,7 @@ Typical usage::
 
 from __future__ import annotations
 
+from ._retry import RetryConfig
 from ._version import __version__
 from .async_client import AsyncSIBSClient
 from .client import SIBSClient
@@ -32,6 +33,7 @@ from .exceptions import (
     SIBSConnectionError,
     SIBSError,
     SIBSInvalidWebhookSignature,
+    SIBSRateLimitError,
     SIBSTimeoutError,
     SIBSValidationError,
 )
@@ -50,8 +52,10 @@ from .models import (
     WebhookEvent,
 )
 from .money import format_amount, normalize_amount
+from .redaction import mask_pan, redact
 from .threeds import build_3ds_redirect, build_browser_data, render_3ds_redirect_html
 from .webhooks import (
+    NotificationDeduplicator,
     build_acknowledgement,
     decrypt_webhook,
     hmac_sha256_verifier,
@@ -67,6 +71,7 @@ __all__ = [
     # Config
     "SIBSEnvironment",
     "ClientConfig",
+    "RetryConfig",
     "BASE_URLS",
     # Enums / status
     "PaymentStatus",
@@ -97,14 +102,19 @@ __all__ = [
     "decrypt_webhook",
     "parse_webhook",
     "build_acknowledgement",
+    "NotificationDeduplicator",
     "verify_webhook_signature",
     "hmac_sha256_verifier",
+    # Observability / redaction
+    "mask_pan",
+    "redact",
     # Exceptions
     "SIBSError",
     "SIBSConfigurationError",
     "SIBSValidationError",
     "SIBSAuthenticationError",
     "SIBSAPIError",
+    "SIBSRateLimitError",
     "SIBSTimeoutError",
     "SIBSConnectionError",
     "SIBSInvalidWebhookSignature",

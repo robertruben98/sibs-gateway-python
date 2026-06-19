@@ -17,6 +17,9 @@ FastAPI, Flask, Celery, CLI scripts — anywhere Python runs.
 - Create payments (purchase or pre-authorization), check status, refund, capture, cancel
 - MB WAY purchase flow, MULTIBANCO reference parsing, and card (server-to-server) + 3D-Secure
 - AES-GCM webhook decryption + acknowledgement helper (the scheme SIBS actually uses)
+- Configurable, payment-safe retries with backoff; rate-limit (`429`) and granular
+  timeout handling
+- Credential-safe logging + PAN redaction helpers
 - Typed Pydantic models with normalized statuses (`PaymentStatus`)
 - Safe money handling with `Decimal` (floats are rejected)
 - A clear exception hierarchy — raw `httpx` errors never leak out
@@ -196,6 +199,7 @@ All exceptions inherit from `SIBSError`:
 | `SIBSValidationError` | Input fails local validation (e.g. a float amount, empty id). |
 | `SIBSAuthenticationError` | SIBS rejects credentials (HTTP 401/403). |
 | `SIBSAPIError` | Other API errors (carries `status_code` and `response_body`). |
+| `SIBSRateLimitError` | HTTP 429 (subclass of `SIBSAPIError`); carries `retry_after`. |
 | `SIBSTimeoutError` | The request times out (or HTTP 408). |
 | `SIBSConnectionError` | SIBS cannot be reached (DNS/TCP/TLS). |
 | `SIBSInvalidWebhookSignature` | A webhook signature fails verification. |
@@ -210,6 +214,31 @@ except SIBSAuthenticationError:
 except SIBSError as exc:
     ...  # any other PySIBS failure
 ```
+
+## Reliability & observability
+
+```python
+from pysibs import SIBSClient, RetryConfig
+import httpx
+
+client = SIBSClient(
+    api_key="...", terminal_id="...",
+    retries=RetryConfig(max_retries=3, backoff_factor=0.5),   # or retries=3, or 0 to disable
+    timeout=httpx.Timeout(connect=2.0, read=10.0, write=10.0, pool=2.0),
+    verify=True,          # TLS verification / path to a custom CA bundle
+    proxy="http://proxy.local:8080",
+)
+```
+
+Retries are **payment-safe by default**: idempotent reads (`GET`) retry on connection
+errors, timeouts and retryable statuses, while `POST`s retry **only** on `429`/`503`
+(where the request was not processed). `Retry-After` is honoured; HTTP 429 raises
+`SIBSRateLimitError` with `retry_after` when retries are exhausted/disabled.
+
+Logging is credential-safe — configure the `pysibs` logger to see request metadata
+(method, path, status, elapsed); bodies, headers and credentials are never logged. Use
+`mask_pan()` / `redact()` if you log payloads yourself, and `NotificationDeduplicator`
+to ignore replayed webhooks.
 
 ## PCI DSS note
 

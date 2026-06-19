@@ -42,6 +42,7 @@ __all__ = [
     "decrypt_webhook",
     "parse_webhook",
     "build_acknowledgement",
+    "NotificationDeduplicator",
     "verify_webhook_signature",
     "hmac_sha256_verifier",
     "SignatureVerifier",
@@ -212,6 +213,50 @@ def build_acknowledgement(
     if notification_id is not None:
         ack["notificationID"] = str(notification_id)
     return ack
+
+
+class NotificationDeduplicator:
+    """In-memory guard against processing the same webhook notification twice.
+
+    SIBS retries notifications until acknowledged, so the same ``notificationID`` can
+    arrive more than once. Call :meth:`seen` (or :meth:`is_duplicate`) keyed on the
+    notification id before acting on an event::
+
+        dedup = NotificationDeduplicator()           # module/app-level singleton
+        if dedup.seen(event.notification_id):
+            return ack                               # already processed; just ack
+
+    This is a process-local, bounded LRU set — fine for a single worker. For multiple
+    workers/instances, back the dedupe with a shared store (Redis, DB) instead; this
+    class documents the contract such a store should implement.
+    """
+
+    def __init__(self, maxlen: int = 10_000) -> None:
+        if maxlen <= 0:
+            raise SIBSValidationError("maxlen must be positive.")
+        self._maxlen = maxlen
+        # dict preserves insertion order -> cheap LRU eviction of the oldest entries.
+        self._seen: dict[str, None] = {}
+
+    def is_duplicate(self, notification_id: str | None) -> bool:
+        """Return True if this id was already recorded (without recording it)."""
+        return notification_id is not None and notification_id in self._seen
+
+    def seen(self, notification_id: str | None) -> bool:
+        """Record ``notification_id`` and return whether it had been seen before.
+
+        A ``None`` id is treated as never-seen (cannot dedupe without an id).
+        """
+        if notification_id is None:
+            return False
+        if notification_id in self._seen:
+            return True
+        self._seen[notification_id] = None
+        if len(self._seen) > self._maxlen:
+            # Evict the oldest inserted id.
+            oldest = next(iter(self._seen))
+            del self._seen[oldest]
+        return False
 
 
 def hmac_sha256_verifier(secret: str) -> SignatureVerifier:

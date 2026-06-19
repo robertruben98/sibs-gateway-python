@@ -6,6 +6,26 @@ All notable changes to this project are documented here. This project adheres to
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-06-19
+
+Delivers the roadmap's reliability (0.6.0) and observability/security (0.7.0) scope.
+
+### Added
+- **Retries with backoff + jitter** (`RetryConfig`): transient failures are retried
+  with conservative, payment-safe defaults — idempotent methods (`GET`) retry on
+  connection errors, timeouts and retryable statuses; non-idempotent methods (`POST`)
+  retry **only** on `429`/`503` (request not processed). Pass `retries=` (a
+  `RetryConfig` or an `int`) to clients; `0` disables retries.
+- **`SIBSRateLimitError`** (HTTP 429, subclass of `SIBSAPIError`) carrying `retry_after`;
+  `Retry-After` headers are honoured for backoff.
+- **Granular timeouts**: `timeout=` accepts an `httpx.Timeout` (connect/read/write/pool);
+  plus `verify=` (TLS/custom CA) and `proxy=` passthrough.
+- **Credential-safe logging**: the `pysibs` logger emits DEBUG records with
+  method/path/status/elapsed/attempt only — never headers, bodies or credentials.
+- **Redaction helpers** `mask_pan()` and `redact()` for safely logging payloads that may
+  contain cardholder data.
+- **`NotificationDeduplicator`** to guard against processing a retried webhook twice.
+
 ## [0.4.0] - 2026-06-19
 
 Adds card tokenization, token / recurring payments and a 3DS browser-data helper,
@@ -88,7 +108,8 @@ Grounded in a review of the official SIBS Gateway documentation
 - Full exception hierarchy under `SIBSError`; raw `httpx` errors never leak.
 - Documentation, examples (Django/FastAPI), CI and PyPI publish workflows.
 
-[Unreleased]: https://github.com/robertruben98/pysibs/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/robertruben98/pysibs/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/robertruben98/pysibs/compare/v0.4.0...v0.7.0
 [0.4.0]: https://github.com/robertruben98/pysibs/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/robertruben98/pysibs/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/robertruben98/pysibs/compare/v0.1.0...v0.2.0

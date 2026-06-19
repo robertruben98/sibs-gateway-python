@@ -11,6 +11,8 @@ import httpx
 
 from . import _payloads as P
 from ._http import AsyncHTTPClient
+from ._retry import RetryConfig
+from ._retry import coerce_retries as _coerce_retries
 from .config import DEFAULT_TIMEOUT, ClientConfig, SIBSEnvironment
 from .enums import TransactionType
 from .exceptions import SIBSValidationError
@@ -49,7 +51,10 @@ class AsyncSIBSClient:
         environment: str | SIBSEnvironment = SIBSEnvironment.SANDBOX,
         *,
         base_url: str | None = None,
-        timeout: float = DEFAULT_TIMEOUT,
+        timeout: float | httpx.Timeout = DEFAULT_TIMEOUT,
+        retries: RetryConfig | int | None = None,
+        verify: bool | str = True,
+        proxy: str | None = None,
         client_id: str | None = None,
         webhook_secret: str | None = None,
         idempotency_header: str | None = None,
@@ -70,6 +75,9 @@ class AsyncSIBSClient:
             api_key=self._config.api_key,
             client_id=self._config.client_id,
             timeout=self._config.timeout,
+            retries=_coerce_retries(retries),
+            verify=verify,
+            proxy=proxy,
             transport=transport,
         )
 
@@ -77,7 +85,10 @@ class AsyncSIBSClient:
     def from_env(
         cls,
         *,
-        timeout: float = DEFAULT_TIMEOUT,
+        timeout: float | httpx.Timeout = DEFAULT_TIMEOUT,
+        retries: RetryConfig | int | None = None,
+        verify: bool | str = True,
+        proxy: str | None = None,
         base_url: str | None = None,
         idempotency_header: str | None = None,
         transport: httpx.AsyncBaseTransport | None = None,
@@ -89,6 +100,9 @@ class AsyncSIBSClient:
             environment=config.environment,
             base_url=config.base_url,
             timeout=config.timeout,
+            retries=retries,
+            verify=verify,
+            proxy=proxy,
             client_id=config.client_id,
             webhook_secret=config.webhook_secret,
             idempotency_header=idempotency_header,

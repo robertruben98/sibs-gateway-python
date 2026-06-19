@@ -13,6 +13,8 @@ import os
 from dataclasses import dataclass
 from enum import Enum
 
+import httpx
+
 from .exceptions import SIBSConfigurationError, SIBSValidationError
 from .validators import validate_terminal_id
 
@@ -60,7 +62,7 @@ class ClientConfig:
     terminal_id: str
     environment: SIBSEnvironment
     base_url: str
-    timeout: float
+    timeout: float | httpx.Timeout
     client_id: str | None = None
     webhook_secret: str | None = None
 
@@ -72,7 +74,7 @@ class ClientConfig:
         terminal_id: str,
         environment: str | SIBSEnvironment = SIBSEnvironment.SANDBOX,
         base_url: str | None = None,
-        timeout: float = DEFAULT_TIMEOUT,
+        timeout: float | httpx.Timeout = DEFAULT_TIMEOUT,
         client_id: str | None = None,
         webhook_secret: str | None = None,
     ) -> ClientConfig:
@@ -86,15 +88,21 @@ class ClientConfig:
         env = SIBSEnvironment.coerce(environment)
         resolved_base_url = (base_url or BASE_URLS[env]).rstrip("/")
 
-        if timeout <= 0:
-            raise SIBSConfigurationError("timeout must be a positive number of seconds.")
+        # A plain number is treated as a total-seconds timeout; an httpx.Timeout gives
+        # granular connect/read/write/pool control and is passed through untouched.
+        if isinstance(timeout, httpx.Timeout):
+            resolved_timeout: float | httpx.Timeout = timeout
+        else:
+            if timeout <= 0:
+                raise SIBSConfigurationError("timeout must be a positive number of seconds.")
+            resolved_timeout = float(timeout)
 
         return cls(
             api_key=str(api_key).strip(),
             terminal_id=terminal,
             environment=env,
             base_url=resolved_base_url,
-            timeout=float(timeout),
+            timeout=resolved_timeout,
             client_id=(
                 client_id.strip()
                 if isinstance(client_id, str) and client_id.strip()
@@ -107,7 +115,7 @@ class ClientConfig:
     def from_env(
         cls,
         *,
-        timeout: float = DEFAULT_TIMEOUT,
+        timeout: float | httpx.Timeout = DEFAULT_TIMEOUT,
         base_url: str | None = None,
     ) -> ClientConfig:
         """Build configuration from ``SIBS_*`` environment variables.
