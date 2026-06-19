@@ -12,7 +12,12 @@ from __future__ import annotations
 
 from enum import Enum
 
-__all__ = ["PaymentStatus", "PaymentMethod", "normalize_payment_status"]
+__all__ = [
+    "PaymentStatus",
+    "PaymentMethod",
+    "TransactionType",
+    "normalize_payment_status",
+]
 
 
 class PaymentStatus(str, Enum):
@@ -32,11 +37,45 @@ class PaymentStatus(str, Enum):
 
 
 class PaymentMethod(str, Enum):
-    """Payment methods commonly supported by SIBS Gateway."""
+    """Payment methods supported by SIBS Gateway.
+
+    The wire value for a MULTIBANCO reference payment is ``"REFERENCE"``. ``MULTIBANCO``
+    is kept as a backwards-compatible alias of ``REFERENCE`` (same value).
+    """
 
     CARD = "CARD"
     MBWAY = "MBWAY"
-    MULTIBANCO = "MULTIBANCO"
+    REFERENCE = "REFERENCE"
+    MULTIBANCO = "REFERENCE"  # alias of REFERENCE (deprecated name)
+
+
+class TransactionType(str, Enum):
+    """SIBS transaction types: a purchase captures immediately, an authorization holds
+    the amount until a capture is performed."""
+
+    PURCHASE = "PURS"
+    AUTHORIZATION = "AUTH"
+
+    @classmethod
+    def coerce(cls, value: str | TransactionType) -> TransactionType:
+        if isinstance(value, cls):
+            return value
+        token = str(value).strip().upper()
+        # Accept both the wire codes (PURS/AUTH) and friendly names.
+        aliases = {
+            "PURS": cls.PURCHASE,
+            "PURCHASE": cls.PURCHASE,
+            "AUTH": cls.AUTHORIZATION,
+            "AUTHORIZATION": cls.AUTHORIZATION,
+            "AUTHORISATION": cls.AUTHORIZATION,
+        }
+        if token in aliases:
+            return aliases[token]
+        from .exceptions import SIBSValidationError
+
+        raise SIBSValidationError(
+            f"Invalid transaction_type {value!r}; expected one of: PURS, AUTH."
+        )
 
 
 # Mapping of known raw SIBS status tokens (lower-cased) to normalized statuses.

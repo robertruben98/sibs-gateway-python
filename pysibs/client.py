@@ -7,15 +7,18 @@ import httpx
 from . import _payloads as P
 from ._http import HTTPClient
 from .config import DEFAULT_TIMEOUT, ClientConfig, SIBSEnvironment
+from .enums import TransactionType
+from .exceptions import SIBSValidationError
 from .idempotency import build_idempotency_headers
 from .models import (
+    MBWayResponse,
     OperationResponse,
     PaymentResponse,
     PaymentStatusResponse,
     RefundResponse,
 )
 from .money import Amount
-from .validators import validate_payment_id
+from .validators import validate_mbway_phone, validate_payment_id
 
 __all__ = ["SIBSClient"]
 
@@ -102,17 +105,23 @@ class SIBSClient:
         amount: Amount,
         currency: str = "EUR",
         merchant_transaction_id: str,
+        transaction_type: str | TransactionType = TransactionType.PURCHASE,
         description: str | None = None,
         return_url: str | None = None,
         cancel_url: str | None = None,
         payment_methods: list[str] | None = None,
         idempotency_key: str | None = None,
     ) -> PaymentResponse:
-        """Create a payment and return a typed :class:`PaymentResponse`."""
+        """Create a payment and return a typed :class:`PaymentResponse`.
+
+        ``transaction_type`` is ``PURS`` (purchase, captured immediately) by default;
+        pass ``AUTH`` to pre-authorize and capture later via :meth:`capture_payment`.
+        """
         request = P.prepare_payment_request(
             amount=amount,
             currency=currency,
             merchant_transaction_id=merchant_transaction_id,
+            transaction_type=transaction_type,
             description=description,
             return_url=return_url,
             cancel_url=cancel_url,
@@ -124,6 +133,37 @@ class SIBSClient:
             "POST", "/payments", json=payload, headers=self._idempotency_headers(idempotency_key)
         )
         return P.parse_create_payment_response(data)
+
+    def pay_with_mbway(
+        self,
+        *,
+        payment_id: str,
+        transaction_signature: str,
+        customer_phone: str,
+        idempotency_key: str | None = None,
+    ) -> MBWayResponse:
+        """Trigger an MB WAY purchase on a previously created payment.
+
+        This is the second step of the MB WAY flow: after :meth:`create_payment` with
+        the ``MBWAY`` method, call this with the ``transaction_signature`` from that
+        response and the shopper's ``customer_phone`` (format ``"351#911234567"``). SIBS
+        then pushes a payment request to the MB WAY app; the final outcome arrives via
+        webhook. This call authenticates with ``Authorization: Digest`` rather than the
+        client's bearer token.
+        """
+        pid = validate_payment_id(payment_id)
+        if not transaction_signature or not str(transaction_signature).strip():
+            raise SIBSValidationError("transaction_signature is required for MB WAY.")
+        phone = validate_mbway_phone(customer_phone)
+        headers = {"Authorization": f"Digest {transaction_signature.strip()}"}
+        headers.update(self._idempotency_headers(idempotency_key))
+        data = self._http.request(
+            "POST",
+            f"/payments/{pid}/mbway-id/purchase",
+            json=P.build_mbway_payload(phone),
+            headers=headers,
+        )
+        return P.parse_mbway_response(data, pid)
 
     def get_payment_status(self, payment_id: str) -> PaymentStatusResponse:
         """Query the current status of a payment."""

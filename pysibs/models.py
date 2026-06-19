@@ -16,14 +16,29 @@ from pydantic import BaseModel, ConfigDict, Field
 from .enums import PaymentStatus
 
 __all__ = [
+    "PaymentReference",
     "PaymentRequest",
     "PaymentResponse",
     "PaymentStatusResponse",
     "RefundRequest",
     "RefundResponse",
     "OperationResponse",
+    "MBWayResponse",
     "WebhookEvent",
 ]
+
+
+class PaymentReference(BaseModel):
+    """A MULTIBANCO reference returned by SIBS (entity + reference the shopper pays)."""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    entity: str | None = None
+    reference: str | None = None
+    amount: Decimal | None = None
+    currency: str | None = None
+    expire_date: str | None = None
+    raw: dict[str, Any] = Field(default_factory=dict)
 
 
 class PaymentRequest(BaseModel):
@@ -34,6 +49,7 @@ class PaymentRequest(BaseModel):
     amount: Decimal
     currency: str
     merchant_transaction_id: str
+    transaction_type: str = "PURS"
     description: str | None = None
     return_url: str | None = None
     cancel_url: str | None = None
@@ -50,6 +66,7 @@ class PaymentResponse(BaseModel):
     raw_status: str | None = None
     redirect_url: str | None = None
     signature: str | None = None
+    payment_reference: PaymentReference | None = None
     raw_response: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -61,6 +78,7 @@ class PaymentStatusResponse(BaseModel):
     payment_id: str
     status: PaymentStatus = PaymentStatus.UNKNOWN
     raw_status: str | None = None
+    payment_reference: PaymentReference | None = None
     raw_response: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -98,14 +116,32 @@ class OperationResponse(BaseModel):
     raw_response: dict[str, Any] = Field(default_factory=dict)
 
 
+class MBWayResponse(BaseModel):
+    """Result of triggering an MB WAY purchase on a created payment."""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    payment_id: str
+    status: PaymentStatus = PaymentStatus.UNKNOWN
+    raw_status: str | None = None
+    raw_response: dict[str, Any] = Field(default_factory=dict)
+
+
 class WebhookEvent(BaseModel):
-    """A parsed (and optionally verified) webhook notification."""
+    """A parsed (and decrypted) webhook notification.
+
+    ``notification_id`` must be echoed back in the HTTP 200 acknowledgement so SIBS
+    does not retry the notification (see :func:`pysibs.webhooks.build_acknowledgement`).
+    """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     event_type: str | None = None
+    notification_id: str | None = None
     payment_id: str | None = None
     merchant_transaction_id: str | None = None
+    payment_method: str | None = None
     status: PaymentStatus = PaymentStatus.UNKNOWN
     raw_status: str | None = None
+    payment_reference: PaymentReference | None = None
     raw_payload: dict[str, Any] = Field(default_factory=dict)

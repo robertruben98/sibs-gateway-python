@@ -34,11 +34,51 @@ status.status      # normalized PaymentStatus
 status.raw_status  # original value
 ```
 
+## Transaction type (purchase vs authorization)
+
+`create_payment` accepts `transaction_type` (`"PURS"` by default). Pass `"AUTH"` to
+pre-authorize, then capture later:
+
+```python
+auth = client.create_payment(
+    amount="25.50", merchant_transaction_id="ORD-1", transaction_type="AUTH"
+)
+client.capture_payment(payment_id=auth.id, amount="25.50")
+```
+
 ## Capture & cancel
 
 ```python
 client.capture_payment(payment_id="payment_123", amount="25.50")
 client.cancel_payment("payment_123")
+```
+
+## MB WAY
+
+After creating a payment with the `MBWAY` method, trigger the purchase. The shopper
+approves it in the MB WAY app and the outcome arrives via webhook.
+
+```python
+payment = client.create_payment(
+    amount="10.00", merchant_transaction_id="ORD-2", payment_methods=["MBWAY"]
+)
+client.pay_with_mbway(
+    payment_id=payment.id,
+    transaction_signature=payment.signature,
+    customer_phone="351#911234567",   # "<countryCode>#<number>"
+)
+```
+
+## MULTIBANCO reference
+
+When the `REFERENCE` method is used, the response exposes a typed `payment_reference`:
+
+```python
+payment = client.create_payment(
+    amount="25.50", merchant_transaction_id="ORD-3", payment_methods=["REFERENCE"]
+)
+ref = payment.payment_reference
+print(ref.entity, ref.reference, ref.amount, ref.expire_date)
 ```
 
 ## Money

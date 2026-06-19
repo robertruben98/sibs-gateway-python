@@ -2,53 +2,67 @@
 
 SIBS notifies your configured endpoint when a transaction's status changes — important
 for asynchronous methods like MB WAY and MULTIBANCO references. Respond `200` quickly
-so SIBS does not retry unnecessarily.
+with the acknowledgement body so SIBS does not retry.
 
-## Parsing
+## Security model: AES-GCM (not HMAC)
 
-```python
-from pysibs import parse_webhook
+Per the official documentation, the SIBS Gateway **encrypts** the webhook body with
+AES-GCM (it does not sign it). The request carries:
 
-event = parse_webhook(raw_body)  # bytes, str or dict
-event.event_type
-event.payment_id
-event.merchant_transaction_id
-event.status       # normalized PaymentStatus
-event.raw_status
-event.raw_payload  # the full, untouched payload
+- `X-Initialization-Vector` — base64 IV (nonce)
+- `X-Authentication-Tag` — base64 GCM authentication tag
+- a base64-encoded ciphertext body, `Content-Type: text/plain`
+
+Decryption requires the optional extra:
+
+```bash
+pip install "pysibs[webhooks]"
 ```
 
-`parse_webhook` never raises on an unknown status — it maps to `PaymentStatus.UNKNOWN`.
-
-## Signature verification
-
-SIBS' webhook signing scheme is not uniformly documented and may differ per
-product/environment, so verification is a **configurable strategy**.
-
-Default (HMAC-SHA256 of the raw body):
+## Decrypt → parse → acknowledge
 
 ```python
-from pysibs import verify_webhook_signature
+from pysibs import decrypt_webhook, parse_webhook, build_acknowledgement
 
-ok = verify_webhook_signature(
-    payload=raw_body,
-    signature=request.headers.get("X-SIBS-Signature"),
-    secret="webhook_secret",
+data = decrypt_webhook(
+    body=raw_body,                                  # base64 ciphertext (request body)
+    iv=request.headers["X-Initialization-Vector"],
+    auth_tag=request.headers["X-Authentication-Tag"],
+    secret=WEBHOOK_SECRET_KEY,                       # from the SIBS Backoffice (16/24/32 bytes)
 )
+
+event = parse_webhook(data)
+print(event.payment_id, event.status, event.merchant_transaction_id)
+print(event.payment_reference)   # for MULTIBANCO references
+
+# Respond HTTP 200 with this JSON so SIBS stops retrying:
+ack = build_acknowledgement(event)   # {"statusCode": "200", "statusMsg": "Success", "notificationID": ...}
 ```
 
-Custom scheme:
+- `decrypt_webhook` raises `SIBSInvalidWebhookSignature` if the tag doesn't match
+  (tampered payload or wrong key), and `SIBSConfigurationError` if `cryptography` isn't
+  installed or the key length is invalid.
+- `parse_webhook` never raises on an unknown status — it maps to `PaymentStatus.UNKNOWN`
+  and preserves `event.raw_payload`.
 
-```python
-def my_verifier(body: bytes, signature: str) -> bool:
-    ...  # implement SIBS' documented scheme for your integration
-    return True
+## `WebhookEvent` fields
 
-ok = verify_webhook_signature(raw_body, signature, verifier=my_verifier)
-```
+| Field | Source |
+| --- | --- |
+| `event_type` | `notificationType` / `eventType` |
+| `notification_id` | `notificationID` (echo it in the ACK) |
+| `payment_id` | `transactionID` |
+| `merchant_transaction_id` | `merchant.transactionId` (nested) |
+| `payment_method` | `paymentMethod` (e.g. `REFERENCE`, `MBWAY`) |
+| `status` / `raw_status` | normalized + original `paymentStatus` |
+| `payment_reference` | `paymentReference` (entity, reference, amount, expire date) |
+| `raw_payload` | full decrypted payload |
 
-Use `raise_on_failure=True` to raise `SIBSInvalidWebhookSignature` instead of returning
-`False`.
+## Custom / legacy verification
 
-> **Always confirm the exact signing scheme against the official SIBS documentation
-> before relying on it in production.**
+`verify_webhook_signature()` and `hmac_sha256_verifier()` remain available for custom
+schemes, but the SIBS Gateway does not use HMAC — prefer `decrypt_webhook` for SIBS
+Gateway notifications.
+
+> Always confirm the exact secret-key encoding and header names for your integration
+> against the official SIBS documentation.

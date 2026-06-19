@@ -18,9 +18,12 @@ __all__ = [
     "validate_url",
     "validate_payment_id",
     "validate_terminal_id",
+    "validate_mbway_phone",
 ]
 
 _CURRENCY_RE = re.compile(r"^[A-Z]{3}$")
+# SIBS MB WAY phone format: "<countryCode>#<number>", e.g. "351#911234567".
+_MBWAY_PHONE_RE = re.compile(r"^\d{1,4}#\d{6,15}$")
 
 
 def _require_non_empty(value: str, field: str) -> str:
@@ -55,6 +58,21 @@ def validate_payment_id(value: str) -> str:
 def validate_terminal_id(value: str) -> str:
     """Validate a terminal id (must be non-empty)."""
     return _require_non_empty(str(value) if value is not None else "", "terminal_id")
+
+
+def validate_mbway_phone(value: str) -> str:
+    """Validate an MB WAY phone in SIBS' ``"<countryCode>#<number>"`` format.
+
+    Example: ``"351#911234567"``. A plain national number is rejected because SIBS
+    requires the country-code prefix and ``#`` separator.
+    """
+    stripped = _require_non_empty(value, "customer_phone")
+    if not _MBWAY_PHONE_RE.match(stripped):
+        raise SIBSValidationError(
+            "customer_phone must look like '<countryCode>#<number>' (e.g. '351#911234567'); "
+            f"got {value!r}."
+        )
+    return stripped
 
 
 def validate_url(value: str, *, require_https: bool = True) -> str:
