@@ -251,9 +251,16 @@ Tested on CPython 3.10, 3.11, 3.12 and 3.13.
 - `0.4.0` — card tokenization, token / recurring payments, 3DS browser-data helper. ✅
 - `0.5.0` — contract hardening: verified, typed models for the currently-opaque card /
   3DS / token / webhook areas.
-- `1.0.0` — stable API once the SIBS contract is fully confirmed end-to-end.
+- `0.6.0` — reliability: retries/backoff, rate-limit and granular timeout handling.
+- `0.7.0` — observability & security: credential-safe logging, PAN masking, typed
+  error codes, optional tracing.
+- `0.8.0` — API completeness: hosted checkout, wallets (Apple/Google Pay), QR,
+  vTerminal, token management, transaction reporting.
+- `0.9.0` — docs site, pagination, expanded examples, ≥95% coverage (release candidate).
+- `1.0.0` — stable, frozen API with a deprecation policy and migration guide.
 
-See [ROADMAP.md](ROADMAP.md) for the detailed, milestone-by-milestone plan to `1.0.0`.
+See [ROADMAP.md](ROADMAP.md) for the exhaustive, milestone-by-milestone plan (including
+the post-1.0 breadth/ecosystem work and the definition of "complete").
 
 ## Contributing
 
