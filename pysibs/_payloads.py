@@ -22,6 +22,7 @@ from .exceptions import SIBSValidationError
 from .models import (
     ActionResponse,
     CardPaymentResponse,
+    CardToken,
     MBWayResponse,
     OperationResponse,
     PaymentReference,
@@ -52,6 +53,7 @@ def prepare_payment_request(
     cancel_url: str | None,
     payment_methods: list[str] | None,
     transaction_type: str | TransactionType,
+    tokenize: bool,
     require_https: bool,
 ) -> PaymentRequest:
     """Validate raw create_payment inputs and return a :class:`PaymentRequest`."""
@@ -61,6 +63,7 @@ def prepare_payment_request(
         currency=normalized_currency,
         merchant_transaction_id=validate_merchant_transaction_id(merchant_transaction_id),
         transaction_type=TransactionType.coerce(transaction_type).value,
+        tokenize=tokenize,
         description=description,
         return_url=validate_url(return_url, require_https=require_https) if return_url else None,
         cancel_url=validate_url(cancel_url, require_https=require_https) if cancel_url else None,
@@ -182,6 +185,10 @@ def build_create_payment_payload(req: PaymentRequest, terminal_id: str) -> JSOND
     if req.payment_methods:
         transaction["paymentMethod"] = list(req.payment_methods)
 
+    if req.tokenize:
+        # Ask SIBS to tokenize the card on a successful payment.
+        transaction["tokenisation"] = {"tokenisationRequest": {"tokeniseCard": True}}
+
     payload: JSONDict = {
         "merchant": {
             "terminalId": terminal_id,
@@ -275,6 +282,34 @@ def _extract_action_response(data: JSONDict) -> ActionResponse | None:
     )
 
 
+def _extract_card_token(data: JSONDict) -> CardToken | None:
+    """Parse a stored-card token from a card response, if present."""
+    token = data.get("token")
+    if isinstance(token, str):
+        return CardToken(value=token, raw={"token": token})
+    if not isinstance(token, dict):
+        # Some responses nest it under a tokenisation/tokenInfo object.
+        for key in ("tokenisation", "tokenInfo", "tokenisationResponse"):
+            candidate = data.get(key)
+            if isinstance(candidate, dict):
+                token = candidate
+                break
+    if not isinstance(token, dict) or not token:
+        return None
+
+    return CardToken(
+        value=(
+            token.get("value")
+            or token.get("token")
+            or token.get("tokenValue")
+            or token.get("id")
+        ),
+        expiry=token.get("expiry") or token.get("expireDate") or token.get("expirationDate"),
+        masked_pan=token.get("maskedPan") or token.get("maskedPAN") or token.get("cardMasked"),
+        raw=token,
+    )
+
+
 def build_card_payload(card: JSONDict) -> JSONDict:
     """Pass through an opaque card payload built by the caller.
 
@@ -294,6 +329,7 @@ def parse_card_response(data: JSONDict, payment_id: str) -> CardPaymentResponse:
         status=normalized,
         raw_status=raw_status,
         action=_extract_action_response(data),
+        token=_extract_card_token(data),
         raw_response=data,
     )
 

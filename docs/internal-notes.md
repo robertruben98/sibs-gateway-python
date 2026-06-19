@@ -17,6 +17,8 @@ private data belong here.
 | MB WAY | 2-step: create checkout → `POST /payments/{id}/mbway-id/purchase` with `customerPhone:"351#9XXXXXXXX"` and `Authorization: Digest {transactionSignature}` | `pay_with_mbway` ✅ |
 | Card S2S | create checkout (CARD) → POST card data with `Authorization: Digest {transactionSignature}`; statuses `Success`/`Declined`/`Pending`/`Partial` | `pay_with_card` (opaque) ✅ |
 | 3D-Secure | `paymentStatus: "Partial"` → POST 3DS auth; `actionResponse.data.url` + `data.params` to redirect the browser (POST), then resubmit | `submit_3ds`, `ActionResponse`, `threeds` ✅ |
+| Tokenization | checkout carries `tokenisation.tokenisationRequest.tokeniseCard=true`; success returns token value + expiry + masked card | `create_payment(tokenize=True)`, `CardToken` ✅ |
+| Recurring / MIT | initial recurring (cardholder present) vs following (merchant-initiated) via stored token | `pay_with_token` (opaque) ✅ |
 | Webhooks | Body **AES-GCM encrypted** (not HMAC); headers `X-Initialization-Vector`, `X-Authentication-Tag`, base64 body; ack with HTTP 200 + `{statusCode,statusMsg,notificationID}` | `webhooks.py` ✅ |
 | Webhook payload | `returnStatus{statusCode,statusMsg}`, `paymentStatus`, `paymentMethod`, `transactionID`, `amount{value,currency}`, `merchant{transactionId,terminalId,merchantName}`, `notificationID`, `paymentReference` | `parse_webhook` ✅ |
 
@@ -29,6 +31,8 @@ private data belong here.
 | Idempotency | No header sent by default (`idempotency.py`) | Whether a dedicated idempotency header exists. |
 | Card request fields | Opaque payload (caller builds body); not modelled | Exact card field names (cardInfo/cardNumber/cvv/...). |
 | Card / 3DS endpoint paths | Defaults `card-id/purchase`, `card-id/3ds` (overridable via `path=`) | Exact paths and the 3DS request body (browser data). |
+| Token / recurring fields | Opaque `pay_with_token` payload; token parsed flexibly | Exact token reference + initial/following recurring (MIT) field names. |
+| 3DS browser data | EMVCo-standard names (`build_browser_data`) | Exact nesting/names SIBS expects. |
 
 ## Design guardrails
 

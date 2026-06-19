@@ -248,7 +248,7 @@ Tested on CPython 3.10, 3.11, 3.12 and 3.13.
 - `0.2.0` — AES-GCM webhook decryption + acknowledgement, MB WAY purchase flow,
   MULTIBANCO reference parsing, `AUTH`/`PURS` transaction types. ✅
 - `0.3.0` — card server-to-server (opaque payload) + 3D-Secure redirect handling. ✅
-- `0.4.0` — card tokenization, recurring payments, richer 3DS browser-data helpers.
+- `0.4.0` — card tokenization, token / recurring payments, 3DS browser-data helper. ✅
 - `1.0.0` — stable API once the SIBS contract is fully confirmed end-to-end.
 
 ## Contributing
