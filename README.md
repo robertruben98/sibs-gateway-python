@@ -244,12 +244,16 @@ Tested on CPython 3.10, 3.11, 3.12 and 3.13.
 ## Roadmap
 
 - `0.1.0` — `SIBSClient`/`AsyncSIBSClient`, create/status/refund/capture/cancel,
-  webhook parsing, typed models, docs.
+  webhook parsing, typed models, docs. ✅
 - `0.2.0` — AES-GCM webhook decryption + acknowledgement, MB WAY purchase flow,
   MULTIBANCO reference parsing, `AUTH`/`PURS` transaction types. ✅
 - `0.3.0` — card server-to-server (opaque payload) + 3D-Secure redirect handling. ✅
 - `0.4.0` — card tokenization, token / recurring payments, 3DS browser-data helper. ✅
+- `0.5.0` — contract hardening: verified, typed models for the currently-opaque card /
+  3DS / token / webhook areas.
 - `1.0.0` — stable API once the SIBS contract is fully confirmed end-to-end.
+
+See [ROADMAP.md](ROADMAP.md) for the detailed, milestone-by-milestone plan to `1.0.0`.
 
 ## Contributing
 
