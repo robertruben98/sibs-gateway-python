@@ -27,6 +27,7 @@ class PaymentStatus(str, Enum):
     PENDING = "pending"
     AUTHORIZED = "authorized"
     CAPTURED = "captured"
+    ACTION_REQUIRED = "action_required"
     DECLINED = "declined"
     CANCELED = "canceled"
     REFUNDED = "refunded"
@@ -95,6 +96,9 @@ _STATUS_MAP: dict[str, PaymentStatus] = {
     "authorized": PaymentStatus.AUTHORIZED,
     "auth": PaymentStatus.AUTHORIZED,
     "pre_authorized": PaymentStatus.AUTHORIZED,
+    # Action required (e.g. 3D-Secure authentication needed before resubmitting)
+    "partial": PaymentStatus.ACTION_REQUIRED,
+    "action_required": PaymentStatus.ACTION_REQUIRED,
     # Captured / paid / success
     "captured": PaymentStatus.CAPTURED,
     "purchased": PaymentStatus.CAPTURED,

@@ -36,6 +36,8 @@ from .exceptions import (
     SIBSValidationError,
 )
 from .models import (
+    ActionResponse,
+    CardPaymentResponse,
     MBWayResponse,
     OperationResponse,
     PaymentReference,
@@ -47,6 +49,7 @@ from .models import (
     WebhookEvent,
 )
 from .money import format_amount, normalize_amount
+from .threeds import build_3ds_redirect, render_3ds_redirect_html
 from .webhooks import (
     build_acknowledgement,
     decrypt_webhook,
@@ -78,10 +81,15 @@ __all__ = [
     "RefundResponse",
     "OperationResponse",
     "MBWayResponse",
+    "ActionResponse",
+    "CardPaymentResponse",
     "WebhookEvent",
     # Money
     "normalize_amount",
     "format_amount",
+    # 3D-Secure
+    "build_3ds_redirect",
+    "render_3ds_redirect_html",
     # Webhooks
     "decrypt_webhook",
     "parse_webhook",

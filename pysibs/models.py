@@ -24,8 +24,27 @@ __all__ = [
     "RefundResponse",
     "OperationResponse",
     "MBWayResponse",
+    "ActionResponse",
+    "CardPaymentResponse",
     "WebhookEvent",
 ]
+
+
+class ActionResponse(BaseModel):
+    """A follow-up action SIBS asks the merchant to perform.
+
+    For card payments this carries the 3D-Secure redirect: the shopper's browser must
+    be sent (usually via an auto-submitting POST form) to ``url`` with ``params`` as
+    form fields. See :func:`pysibs.threeds.build_3ds_redirect`.
+    """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    type: str | None = None
+    method: str = "POST"
+    url: str | None = None
+    params: dict[str, Any] = Field(default_factory=dict)
+    raw: dict[str, Any] = Field(default_factory=dict)
 
 
 class PaymentReference(BaseModel):
@@ -125,6 +144,28 @@ class MBWayResponse(BaseModel):
     status: PaymentStatus = PaymentStatus.UNKNOWN
     raw_status: str | None = None
     raw_response: dict[str, Any] = Field(default_factory=dict)
+
+
+class CardPaymentResponse(BaseModel):
+    """Result of submitting a card payment.
+
+    When ``status`` is :attr:`PaymentStatus.ACTION_REQUIRED` (SIBS ``"Partial"``), a 3DS
+    authentication is required: inspect ``action`` for the redirect details and resubmit
+    the payment afterwards.
+    """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    payment_id: str
+    status: PaymentStatus = PaymentStatus.UNKNOWN
+    raw_status: str | None = None
+    action: ActionResponse | None = None
+    raw_response: dict[str, Any] = Field(default_factory=dict)
+
+    @property
+    def requires_3ds(self) -> bool:
+        """True when a 3D-Secure authentication step is required."""
+        return self.status is PaymentStatus.ACTION_REQUIRED or self.action is not None
 
 
 class WebhookEvent(BaseModel):

@@ -11,6 +11,7 @@ from .enums import TransactionType
 from .exceptions import SIBSValidationError
 from .idempotency import build_idempotency_headers
 from .models import (
+    CardPaymentResponse,
     MBWayResponse,
     OperationResponse,
     PaymentResponse,
@@ -21,6 +22,11 @@ from .money import Amount
 from .validators import validate_mbway_phone, validate_payment_id
 
 __all__ = ["SIBSClient"]
+
+# Default card endpoints (analogous to the MB WAY path). NOTE: the exact card/3DS paths
+# are not fully documented publicly -- override via the ``path`` argument if needed.
+_CARD_PURCHASE_PATH = "card-id/purchase"
+_CARD_3DS_PATH = "card-id/3ds"
 
 
 class SIBSClient:
@@ -164,6 +170,75 @@ class SIBSClient:
             headers=headers,
         )
         return P.parse_mbway_response(data, pid)
+
+    def pay_with_card(
+        self,
+        *,
+        payment_id: str,
+        transaction_signature: str,
+        card: dict[str, object],
+        path: str = _CARD_PURCHASE_PATH,
+        idempotency_key: str | None = None,
+    ) -> CardPaymentResponse:
+        """Submit a server-to-server card payment on a created payment.
+
+        ``card`` is an **opaque** payload that you build to match your verified SIBS
+        contract — PySIBS does not model raw PAN/CVV fields. The result may require a
+        3D-Secure step: when ``response.requires_3ds`` is true, use ``response.action``
+        with :mod:`pysibs.threeds` to redirect the shopper, then call
+        :meth:`submit_3ds`.
+
+        .. warning::
+           Transmitting raw card data brings your environment into PCI DSS scope.
+        """
+        return self._digest_post(
+            payment_id=payment_id,
+            transaction_signature=transaction_signature,
+            path=path,
+            body=P.build_card_payload(card),
+            idempotency_key=idempotency_key,
+        )
+
+    def submit_3ds(
+        self,
+        *,
+        payment_id: str,
+        transaction_signature: str,
+        data: dict[str, object],
+        path: str = _CARD_3DS_PATH,
+        idempotency_key: str | None = None,
+    ) -> CardPaymentResponse:
+        """Submit the 3D-Secure authentication step for a card payment.
+
+        ``data`` is an opaque payload (e.g. browser/challenge data) per your verified
+        contract. Returns the updated :class:`CardPaymentResponse`.
+        """
+        return self._digest_post(
+            payment_id=payment_id,
+            transaction_signature=transaction_signature,
+            path=path,
+            body=P.build_card_payload(data),
+            idempotency_key=idempotency_key,
+        )
+
+    def _digest_post(
+        self,
+        *,
+        payment_id: str,
+        transaction_signature: str,
+        path: str,
+        body: dict[str, object],
+        idempotency_key: str | None,
+    ) -> CardPaymentResponse:
+        pid = validate_payment_id(payment_id)
+        if not transaction_signature or not str(transaction_signature).strip():
+            raise SIBSValidationError("transaction_signature is required.")
+        headers = {"Authorization": f"Digest {transaction_signature.strip()}"}
+        headers.update(self._idempotency_headers(idempotency_key))
+        response = self._http.request(
+            "POST", f"/payments/{pid}/{path.strip('/')}", json=body, headers=headers
+        )
+        return P.parse_card_response(response, pid)
 
     def get_payment_status(self, payment_id: str) -> PaymentStatusResponse:
         """Query the current status of a payment."""

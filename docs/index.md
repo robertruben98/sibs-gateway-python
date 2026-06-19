@@ -5,6 +5,7 @@ PySIBS is a modern, typed Python SDK for SIBS Gateway payment integrations.
 - [Getting started](getting-started.md)
 - [Configuration](configuration.md)
 - [Payments](payments.md)
+- [Cards & 3D-Secure](cards.md)
 - [Refunds](refunds.md)
 - [Webhooks](webhooks.md)
 - [Errors](errors.md)

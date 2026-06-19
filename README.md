@@ -15,7 +15,7 @@ FastAPI, Flask, Celery, CLI scripts — anywhere Python runs.
 
 - Synchronous (`SIBSClient`) and asynchronous (`AsyncSIBSClient`) clients
 - Create payments (purchase or pre-authorization), check status, refund, capture, cancel
-- MB WAY purchase flow and MULTIBANCO reference parsing
+- MB WAY purchase flow, MULTIBANCO reference parsing, and card (server-to-server) + 3D-Secure
 - AES-GCM webhook decryption + acknowledgement helper (the scheme SIBS actually uses)
 - Typed Pydantic models with normalized statuses (`PaymentStatus`)
 - Safe money handling with `Decimal` (floats are rejected)
@@ -141,6 +141,27 @@ async with AsyncSIBSClient.from_env() as client:
     payment = await client.create_payment(amount="10.00", merchant_transaction_id="ORDER-1")
 ```
 
+## Card payments & 3D-Secure
+
+> ⚠️ Transmitting raw card data brings your environment into **PCI DSS scope**. PySIBS
+> never stores/logs card data and takes an **opaque** card payload (you build the body),
+> so it does not model PAN/CVV. See [docs/cards.md](docs/cards.md).
+
+```python
+payment = client.create_payment(
+    amount="25.50", merchant_transaction_id="ORD-1", payment_methods=["CARD"]
+)
+result = client.pay_with_card(
+    payment_id=payment.id,
+    transaction_signature=payment.signature,
+    card={"card": {"number": "...", "expiry": "MM/YY", "cvv": "..."}},  # opaque
+)
+if result.requires_3ds:
+    from pysibs import render_3ds_redirect_html
+    html = render_3ds_redirect_html(result.action)   # return as the HTTP response body
+    # ...then client.submit_3ds(...) to finish.
+```
+
 ## Webhooks
 
 SIBS **encrypts** webhook bodies with AES-GCM (it does not sign them). Decrypt, parse,
@@ -226,7 +247,8 @@ Tested on CPython 3.10, 3.11, 3.12 and 3.13.
   webhook parsing, typed models, docs.
 - `0.2.0` — AES-GCM webhook decryption + acknowledgement, MB WAY purchase flow,
   MULTIBANCO reference parsing, `AUTH`/`PURS` transaction types. ✅
-- `0.3.0` — card server-to-server / 3DS flow, more payment-method models.
+- `0.3.0` — card server-to-server (opaque payload) + 3D-Secure redirect handling. ✅
+- `0.4.0` — card tokenization, recurring payments, richer 3DS browser-data helpers.
 - `1.0.0` — stable API once the SIBS contract is fully confirmed end-to-end.
 
 ## Contributing

@@ -16,6 +16,7 @@ from .enums import TransactionType
 from .exceptions import SIBSValidationError
 from .idempotency import build_idempotency_headers
 from .models import (
+    CardPaymentResponse,
     MBWayResponse,
     OperationResponse,
     PaymentResponse,
@@ -26,6 +27,10 @@ from .money import Amount
 from .validators import validate_mbway_phone, validate_payment_id
 
 __all__ = ["AsyncSIBSClient"]
+
+# See pysibs.client for notes on these (unverified) default card endpoints.
+_CARD_PURCHASE_PATH = "card-id/purchase"
+_CARD_3DS_PATH = "card-id/3ds"
 
 
 class AsyncSIBSClient:
@@ -157,6 +162,63 @@ class AsyncSIBSClient:
             headers=headers,
         )
         return P.parse_mbway_response(data, pid)
+
+    async def pay_with_card(
+        self,
+        *,
+        payment_id: str,
+        transaction_signature: str,
+        card: dict[str, object],
+        path: str = _CARD_PURCHASE_PATH,
+        idempotency_key: str | None = None,
+    ) -> CardPaymentResponse:
+        """Submit a server-to-server card payment. See
+        :meth:`pysibs.client.SIBSClient.pay_with_card` for details and the PCI warning.
+        """
+        return await self._digest_post(
+            payment_id=payment_id,
+            transaction_signature=transaction_signature,
+            path=path,
+            body=P.build_card_payload(card),
+            idempotency_key=idempotency_key,
+        )
+
+    async def submit_3ds(
+        self,
+        *,
+        payment_id: str,
+        transaction_signature: str,
+        data: dict[str, object],
+        path: str = _CARD_3DS_PATH,
+        idempotency_key: str | None = None,
+    ) -> CardPaymentResponse:
+        """Submit the 3D-Secure authentication step for a card payment."""
+        return await self._digest_post(
+            payment_id=payment_id,
+            transaction_signature=transaction_signature,
+            path=path,
+            body=P.build_card_payload(data),
+            idempotency_key=idempotency_key,
+        )
+
+    async def _digest_post(
+        self,
+        *,
+        payment_id: str,
+        transaction_signature: str,
+        path: str,
+        body: dict[str, object],
+        idempotency_key: str | None,
+    ) -> CardPaymentResponse:
+        pid = validate_payment_id(payment_id)
+        if not transaction_signature or not str(transaction_signature).strip():
+            raise SIBSValidationError("transaction_signature is required.")
+        headers = {"Authorization": f"Digest {transaction_signature.strip()}"}
+        headers.update(self._idempotency_headers(idempotency_key))
+        response = await self._http.request(
+            "POST", f"/payments/{pid}/{path.strip('/')}", json=body, headers=headers
+        )
+        return P.parse_card_response(response, pid)
 
     async def get_payment_status(self, payment_id: str) -> PaymentStatusResponse:
         pid = validate_payment_id(payment_id)
