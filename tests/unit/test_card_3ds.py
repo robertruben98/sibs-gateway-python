@@ -12,6 +12,7 @@ from pysibs import (
     PaymentStatus,
     SIBSValidationError,
     build_3ds_redirect,
+    build_3ds_resubmit,
     render_3ds_redirect_html,
 )
 from pysibs.client import SIBSClient
@@ -25,7 +26,8 @@ ACTION_RESPONSE = {
     "transactionID": "tx_1",
     "paymentStatus": "Partial",
     "actionResponse": {
-        "type": "3DS",
+        "id": "act_3ds_1",
+        "type": "THREEDS_CHALLENGE",
         "data": {
             "url": "https://acs.test/challenge",
             "params": {"creq": "eyJ0aHJlZURT", "threeDSSessionData": "abc"},
@@ -39,9 +41,7 @@ def test_pay_with_card_success(client: SIBSClient) -> None:
     route = respx.post(f"{BASE}/payments/tx_1/card/purchase").mock(
         return_value=httpx.Response(200, json={"transactionID": "tx_1", "paymentStatus": "Success"})
     )
-    result = client.pay_with_card(
-        payment_id="tx_1", transaction_signature="sig_xyz", card=CARD
-    )
+    result = client.pay_with_card(payment_id="tx_1", transaction_signature="sig_xyz", card=CARD)
     assert result.status is PaymentStatus.CAPTURED
     assert result.requires_3ds is False
     request = route.calls.last.request
@@ -54,15 +54,28 @@ def test_pay_with_card_requires_3ds(client: SIBSClient) -> None:
     respx.post(f"{BASE}/payments/tx_1/card/purchase").mock(
         return_value=httpx.Response(200, json=ACTION_RESPONSE)
     )
-    result = client.pay_with_card(
-        payment_id="tx_1", transaction_signature="sig", card=CARD
-    )
+    result = client.pay_with_card(payment_id="tx_1", transaction_signature="sig", card=CARD)
     assert result.status is PaymentStatus.ACTION_REQUIRED
     assert result.requires_3ds is True
     assert result.action is not None
+    assert result.action.id == "act_3ds_1"
+    assert result.action.type == "THREEDS_CHALLENGE"
     assert result.action.url == "https://acs.test/challenge"
     assert result.action.params["creq"] == "eyJ0aHJlZURT"
     assert result.action.method == "POST"
+
+
+def test_build_3ds_resubmit() -> None:
+    action = ActionResponse(id="act_3ds_1", type="THREEDS_CHALLENGE")
+    body = build_3ds_resubmit(action)
+    assert body == {
+        "actionProcessed": {"id": "act_3ds_1", "type": "THREEDS_CHALLENGE", "executed": True}
+    }
+
+
+def test_build_3ds_resubmit_requires_id() -> None:
+    with pytest.raises(SIBSValidationError):
+        build_3ds_resubmit(ActionResponse(type="THREEDS_CHALLENGE"))
 
 
 @respx.mock
@@ -121,9 +134,7 @@ async def test_async_pay_with_card() -> None:
 
 
 def test_build_3ds_redirect() -> None:
-    action = ActionResponse(
-        url="https://acs.test/c", params={"creq": "abc"}, method="POST"
-    )
+    action = ActionResponse(url="https://acs.test/c", params={"creq": "abc"}, method="POST")
     redirect = build_3ds_redirect(action)
     assert redirect == {
         "method": "POST",
@@ -138,9 +149,7 @@ def test_build_3ds_redirect_without_url_raises() -> None:
 
 
 def test_render_3ds_redirect_html_escapes_and_autosubmits() -> None:
-    action = ActionResponse(
-        url="https://acs.test/c", params={"creq": "a<b>&c", "sess": "1"}
-    )
+    action = ActionResponse(url="https://acs.test/c", params={"creq": "a<b>&c", "sess": "1"})
     html = render_3ds_redirect_html(action)
     assert 'action="https://acs.test/c"' in html
     assert 'name="creq"' in html

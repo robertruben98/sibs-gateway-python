@@ -273,7 +273,9 @@ def _extract_action_response(data: JSONDict) -> ActionResponse | None:
     if not isinstance(params, dict):
         params = {}
 
+    action_id = action.get("id") or action.get("actionId") or inner.get("id")
     return ActionResponse(
+        id=str(action_id) if action_id is not None else None,
         type=action.get("type") or action.get("actionType"),
         method=str(inner.get("method") or action.get("method") or "POST").upper(),
         url=inner.get("url") or action.get("url"),

@@ -53,7 +53,12 @@ from .models import (
 )
 from .money import format_amount, normalize_amount
 from .redaction import mask_pan, redact
-from .threeds import build_3ds_redirect, build_browser_data, render_3ds_redirect_html
+from .threeds import (
+    build_3ds_redirect,
+    build_3ds_resubmit,
+    build_browser_data,
+    render_3ds_redirect_html,
+)
 from .webhooks import (
     NotificationDeduplicator,
     build_acknowledgement,
@@ -96,6 +101,7 @@ __all__ = [
     "format_amount",
     # 3D-Secure
     "build_3ds_redirect",
+    "build_3ds_resubmit",
     "render_3ds_redirect_html",
     "build_browser_data",
     # Webhooks

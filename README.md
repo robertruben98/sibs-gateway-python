@@ -289,8 +289,8 @@ Tested on CPython 3.10, 3.11, 3.12 and 3.13.
   card/token endpoint paths, `tokenList` parsing, confirmed 3DS/`cardInfo` shape. ✅
 - `0.9.0` — swagger-verified MIT enums (`UCOF`/`RCRR`), `deviceInfo` field names
   (dropped non-schema `browserJavascriptEnabled`), sandbox host note. ✅
-- `1.0.0` — stable API once the last two details (AES key bit-length, 3DS resubmit
-  body) are confirmed end-to-end.
+- `1.0.0` — **stable API.** 3DS resubmit modelled (`build_3ds_resubmit`,
+  `ActionResponse.id`); SIBS contract confirmed end-to-end against the official swagger. ✅
 
 ## Contributing
 

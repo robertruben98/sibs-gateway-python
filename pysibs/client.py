@@ -233,14 +233,15 @@ class SIBSClient:
         path: str = _CARD_3DS_PATH,
         idempotency_key: str | None = None,
     ) -> CardPaymentResponse:
-        """Submit the 3D-Secure step for a card payment.
+        """Resubmit a card payment after the 3D-Secure challenge completes.
 
-        Note that SIBS collects 3DS browser/device data inside the original
-        ``card/purchase`` request (under ``info.deviceInfo`` — see
-        :func:`pysibs.threeds.build_browser_data`); a ``Partial`` status then returns an
-        ``actionResponse`` to redirect the shopper. This method posts the *resubmit* after
-        the challenge. The exact resubmit body/endpoint is not fully public, so ``data``
-        is an opaque payload and ``path`` is overridable. Returns the updated
+        SIBS has no separate 3DS endpoint: 3DS browser/device data is sent inside the
+        original ``card/purchase`` request (under ``info.deviceInfo`` — see
+        :func:`pysibs.threeds.build_browser_data`); a ``Partial`` status returns an
+        ``actionResponse`` to redirect the shopper. Once the challenge is done you call
+        this method (it posts back to ``card/purchase``) with an ``actionProcessed`` body
+        echoing the challenge id — build it with
+        :func:`pysibs.threeds.build_3ds_resubmit(response.action)`. Returns the updated
         :class:`CardPaymentResponse`.
         """
         return self._digest_post(

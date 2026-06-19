@@ -54,11 +54,12 @@ if result.requires_3ds:
     html = render_3ds_redirect_html(result.action)
     # ... return `html` as your HTTP response body ...
 
-    # After the challenge returns, submit the 3DS step and resubmit as needed:
+    # After the challenge returns, resubmit (build the actionProcessed body):
+    from pysibs import build_3ds_resubmit
     final = client.submit_3ds(
         payment_id=payment.id,
         transaction_signature=payment.signature,
-        data={"...": "..."},   # opaque 3DS/browser payload
+        data=build_3ds_resubmit(result.action),
     )
 else:
     print(result.status)  # CAPTURED / DECLINED / ...
@@ -146,13 +147,26 @@ result = client.pay_with_card(
 )
 ```
 
-A `Partial` status returns `actionResponse{type: "THREEDS_CHALLENGE", data{url, params}}`
-to redirect the shopper. After the challenge you resubmit via `submit_3ds`; the exact
-resubmit body/endpoint is not fully public, so it takes an opaque payload and an
-overridable `path`.
+A `Partial` status returns `actionResponse{id, type: "THREEDS_CHALLENGE", data{url, params}}`
+to redirect the shopper. There is **no separate 3DS endpoint**: once the challenge
+completes you call `card/purchase` again with an `actionProcessed` object echoing the
+challenge id. Build it with `build_3ds_resubmit` and pass it to `submit_3ds`:
+
+```python
+from pysibs import build_3ds_resubmit
+
+final = client.submit_3ds(
+    payment_id=payment.id,
+    transaction_signature=payment.signature,
+    data=build_3ds_resubmit(result.action),
+    # → {"actionProcessed": {"id": ..., "type": "THREEDS_CHALLENGE", "executed": True}}
+)
+print(final.status)  # CAPTURED / DECLINED
+```
 
 ## Endpoint overrides
 
-`pay_with_card` defaults to `card/purchase` and `pay_with_token` to `token/purchase`
-(both confirmed). `submit_3ds` defaults to `card/purchase` but the 3DS resubmit contract
-is not fully public — override `path` to match your integration if it differs.
+`pay_with_card` and `submit_3ds` default to `card/purchase` and `pay_with_token` to
+`token/purchase` — all confirmed against the SIBS swagger. Override `path` only if your
+integration uses a different host/version (e.g. the developer sandbox uses
+`sibs/spg/v1`).

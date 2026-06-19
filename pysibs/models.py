@@ -56,6 +56,7 @@ class ActionResponse(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
+    id: str | None = None
     type: str | None = None
     method: str = "POST"
     url: str | None = None
