@@ -17,7 +17,12 @@ from typing import Any
 from .exceptions import SIBSValidationError
 from .models import ActionResponse
 
-__all__ = ["build_3ds_redirect", "render_3ds_redirect_html", "build_browser_data"]
+__all__ = [
+    "build_3ds_redirect",
+    "render_3ds_redirect_html",
+    "build_browser_data",
+    "build_3ds_resubmit",
+]
 
 
 def build_browser_data(
@@ -63,6 +68,34 @@ def build_3ds_redirect(action: ActionResponse) -> dict[str, Any]:
     if action.url is None:
         raise SIBSValidationError("ActionResponse has no url to redirect to.")
     return {"method": action.method or "POST", "url": action.url, "fields": dict(action.params)}
+
+
+def build_3ds_resubmit(action: ActionResponse, *, executed: bool = True) -> dict[str, Any]:
+    """Build the body to resubmit a card payment after the 3DS challenge completes.
+
+    SIBS has **no** separate 3DS endpoint: once the shopper finishes the challenge you
+    call ``card/purchase`` again (via :meth:`~pysibs.client.SIBSClient.submit_3ds`) with
+    an ``actionProcessed`` object echoing the challenge ``id`` and ``type``. This returns
+    that body::
+
+        {"actionProcessed": {"id": ..., "type": "THREEDS_CHALLENGE", "executed": True}}
+
+    ``action`` is the :class:`~pysibs.models.ActionResponse` from the original
+    ``paymentStatus: "Partial"`` response. Raises :class:`SIBSValidationError` if it has
+    no ``id``.
+    """
+    if action.id is None:
+        raise SIBSValidationError(
+            "ActionResponse has no id; cannot build the 3DS resubmit body. The original "
+            "card response did not include actionResponse.id."
+        )
+    return {
+        "actionProcessed": {
+            "id": action.id,
+            "type": action.type or "THREEDS_CHALLENGE",
+            "executed": executed,
+        }
+    }
 
 
 def render_3ds_redirect_html(action: ActionResponse, *, auto_submit: bool = True) -> str:

@@ -26,21 +26,21 @@ private data belong here.
 | Idempotency | No idempotency header documented; none sent | `idempotency.py` ✅ |
 | Card endpoint + fields | `POST payments/{id}/card/purchase`; body `cardInfo{PAN, secureCode, validationDate (ISO-8601), cardholderName, createToken}`; `Authorization: Digest` + `X-IBM-Client-Id` | path in `client.py` ✅; body opaque (caller builds) |
 | Token charge | `POST payments/{id}/token/purchase`; body `tokenInfo{value, tokenType, secureCode}`; response token in `tokenList[]{value, expireDate, maskedPAN}` | path + `_extract_card_token` ✅; charge body opaque |
-| 3DS | **No separate endpoint** — browser/device data goes under `info.deviceInfo` in the checkout/`card/purchase` request; `Partial` → `actionResponse{type:"THREEDS_CHALLENGE", id, data{url,params}}` | `build_browser_data`, `_extract_action_response` ✅ |
+| 3DS | **No separate endpoint** — browser/device data goes under `info.deviceInfo` in the `card/purchase` request; `Partial` → `actionResponse{id, type:"THREEDS_CHALLENGE", data{url,params}}`; **resubmit** by calling `card/purchase` again with `actionProcessed{id, type, executed}` (CARD API confirms `actionProcessed.type` enum `THREEDS_METHOD`/`THREEDS_CHALLENGE`/`DCC`) | `build_browser_data`, `_extract_action_response`, `build_3ds_resubmit` ✅ |
 | MIT / recurring | `merchantInitiatedTransaction{type, validityDate, amountQualifier, description, schedule, active}`; `type` enum **`UCOF`** / **`RCRR`**; `amountQualifier` `DEFAULT`/`ESTIMATED`/`ACTUAL`; `originalTransaction{id, datetime, recipientId}` | docs in `cards.md` ✅ (payload opaque) |
 | `deviceInfo` fields | `browserAcceptHeader, browserJavaEnabled, browserLanguage, browserColorDepth, browserScreenHeight, browserScreenWidth, browserTZ, browserUserAgent` (+ optional system/device fields); **no** `browserJavascriptEnabled` | `build_browser_data` ✅ |
 | `tokenList` item | `tokenName, tokenType, value, maskedPAN, expireDate` | `_extract_card_token` ✅ |
 | Sandbox host | Free Developer Portal sandbox is `https://sandbox.sibspayments.com/sibs/spg/v2` (swagger-confirmed); contracted quality host is `api.qly.sibspayments.com` | `config.py` note ✅ |
 
-> Source for the above: Checkout API 2.0.1 swagger, SIBS API Market sandbox
-> (`developer.sibsapimarket.com/sandbox/node/13723`), reviewed 2026-06.
+> Source for the above: Checkout API 2.0.1 + CARD API swagger, SIBS API Market sandbox
+> (`developer.sibsapimarket.com/sandbox`, product node 3515 / Checkout node 13723),
+> reviewed 2026-06.
 
 ## Still to confirm
 
 | Area | Current assumption | To verify |
 | --- | --- | --- |
-| AES key bit-length | Length inferred from decoded secret (16/24/32) | Whether the Backoffice secret is documented as a fixed 128/256-bit key. |
-| 3DS resubmit | `submit_3ds` posts an opaque body to an overridable path | Exact body/endpoint to resubmit after the 3DS challenge (incl. `actionResponse.id` wrapping) in the server-to-server CARD API. |
+| AES key bit-length | Length inferred from decoded secret (16/24/32) — accepted as-is, not a blocker | Whether the Backoffice secret is documented as a fixed 128/256-bit key (cosmetic). |
 
 ## Design guardrails
 

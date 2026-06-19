@@ -6,6 +6,25 @@ All notable changes to this project are documented here. This project adheres to
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-06-19
+
+First stable release. The SIBS Gateway contract is now confirmed end-to-end against the
+official documentation and the SIBS API Market swagger (Checkout 2.0.1 + CARD API). The
+public API is considered stable from here.
+
+### Added
+- **`build_3ds_resubmit(action)`** — builds the `actionProcessed{id, type, executed}`
+  body used to resubmit a card payment after the 3D-Secure challenge. SIBS has no separate
+  3DS endpoint: `submit_3ds` posts this back to `card/purchase`.
+- **`ActionResponse.id`** — the challenge id from `actionResponse.id`, now parsed and used
+  by `build_3ds_resubmit`.
+
+### Notes
+- The 3DS resubmit flow is now fully modelled (was the last open contract item). The only
+  undocumented detail left — the AES webhook-key bit-length — is cosmetic: the code accepts
+  any valid AES key length (16/24/32 bytes) derived from the base64 secret.
+- No breaking changes since 0.9.0; the additions are backwards compatible.
+
 ## [0.9.0] - 2026-06-19
 
 Further verification against the **Checkout API 2.0.1 swagger** on the SIBS API Market
@@ -164,7 +183,8 @@ Grounded in a review of the official SIBS Gateway documentation
 - Full exception hierarchy under `SIBSError`; raw `httpx` errors never leak.
 - Documentation, examples (Django/FastAPI), CI and PyPI publish workflows.
 
-[Unreleased]: https://github.com/robertruben98/pysibs/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/robertruben98/pysibs/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/robertruben98/pysibs/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/robertruben98/pysibs/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/robertruben98/pysibs/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/robertruben98/pysibs/compare/v0.4.0...v0.7.0
