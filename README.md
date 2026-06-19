@@ -287,8 +287,10 @@ Tested on CPython 3.10, 3.11, 3.12 and 3.13.
 - `0.7.0` — credential-safe logging, PAN redaction, webhook deduplication. ✅
 - `0.8.0` — contract hardening vs official docs: base64 webhook key, correct
   card/token endpoint paths, `tokenList` parsing, confirmed 3DS/`cardInfo` shape. ✅
-- `1.0.0` — stable API once the remaining SIBS contract details (MIT enums, 3DS
-  resubmit body, AES key bit-length) are confirmed end-to-end.
+- `0.9.0` — swagger-verified MIT enums (`UCOF`/`RCRR`), `deviceInfo` field names
+  (dropped non-schema `browserJavascriptEnabled`), sandbox host note. ✅
+- `1.0.0` — stable API once the last two details (AES key bit-length, 3DS resubmit
+  body) are confirmed end-to-end.
 
 ## Contributing
 

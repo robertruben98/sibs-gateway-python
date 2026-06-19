@@ -110,17 +110,20 @@ client.pay_with_token(
     payment_id=later.id,
     transaction_signature=later.signature,
     payload={
-        "tokenInfo": {"value": "tok_...", "tokenType": "CARD"},
+        "tokenInfo": {"value": "tok_...", "tokenType": "Card"},
+        # merchantInitiatedTransaction.type is UCOF (unscheduled, card-on-file) or
+        # RCRR (recurring); amountQualifier is DEFAULT / ESTIMATED / ACTUAL.
         "merchantInitiatedTransaction": {"type": "UCOF", "amountQualifier": "ESTIMATED"},
     },
 )
 ```
 
 The initial recurring may still trigger 3DS (`result.requires_3ds`); subsequent
-merchant-initiated charges typically do not. Follow-up recurring charges target a
-`.../{original-transaction-id}/recurring` endpoint referencing the original transaction —
-pass it via `path=`. The exact `merchantInitiatedTransaction` enums differ between SIBS
-API versions (e.g. `UCOF` vs recurring), so verify against your integration's swagger.
+merchant-initiated charges typically do not. A recurring (`RCRR`) charge can carry a
+`schedule` and references the first payment via
+`originalTransaction{id, datetime, recipientId}`; follow-ups target a
+`.../{original-transaction-id}/recurring` endpoint (pass it via `path=`). Enum values
+(`UCOF`/`RCRR`, `amountQualifier`) are confirmed against the Checkout API 2.0.1 swagger.
 
 ## 3DS browser data
 

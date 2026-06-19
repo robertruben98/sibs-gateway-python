@@ -30,7 +30,6 @@ def build_browser_data(
     screen_width: int,
     timezone_offset: int = 0,
     java_enabled: bool = False,
-    javascript_enabled: bool = True,
 ) -> dict[str, Any]:
     """Assemble the 3DS browser data collected from the shopper's browser.
 
@@ -52,7 +51,6 @@ def build_browser_data(
         "browserScreenWidth": str(screen_width),
         "browserTZ": str(timezone_offset),
         "browserJavaEnabled": java_enabled,
-        "browserJavascriptEnabled": javascript_enabled,
     }
 
 
