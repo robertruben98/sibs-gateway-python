@@ -113,6 +113,7 @@ class AsyncSIBSClient:
         currency: str = "EUR",
         merchant_transaction_id: str,
         transaction_type: str | TransactionType = TransactionType.PURCHASE,
+        tokenize: bool = False,
         description: str | None = None,
         return_url: str | None = None,
         cancel_url: str | None = None,
@@ -124,6 +125,7 @@ class AsyncSIBSClient:
             currency=currency,
             merchant_transaction_id=merchant_transaction_id,
             transaction_type=transaction_type,
+            tokenize=tokenize,
             description=description,
             return_url=return_url,
             cancel_url=cancel_url,
@@ -198,6 +200,26 @@ class AsyncSIBSClient:
             transaction_signature=transaction_signature,
             path=path,
             body=P.build_card_payload(data),
+            idempotency_key=idempotency_key,
+        )
+
+    async def pay_with_token(
+        self,
+        *,
+        payment_id: str,
+        transaction_signature: str,
+        payload: dict[str, object],
+        path: str = _CARD_PURCHASE_PATH,
+        idempotency_key: str | None = None,
+    ) -> CardPaymentResponse:
+        """Charge a stored card token. See
+        :meth:`pysibs.client.SIBSClient.pay_with_token` for details.
+        """
+        return await self._digest_post(
+            payment_id=payment_id,
+            transaction_signature=transaction_signature,
+            path=path,
+            body=P.build_card_payload(payload),
             idempotency_key=idempotency_key,
         )
 

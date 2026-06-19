@@ -6,6 +6,26 @@ All notable changes to this project are documented here. This project adheres to
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-19
+
+Adds card tokenization, token / recurring payments and a 3DS browser-data helper,
+grounded in the official SIBS documentation; see `docs/cards.md`.
+
+### Added
+- `create_payment(tokenize=True)` — asks SIBS to store a reusable card token on a
+  successful card payment (sends `tokenisation.tokenisationRequest.tokeniseCard`).
+- `CardToken` model (`value`, `expiry`, `masked_pan`); `CardPaymentResponse.token` is
+  parsed from card responses.
+- `pay_with_token()` (sync + async) — charge a stored token, including
+  recurring / merchant-initiated payments, via an **opaque** payload (overridable path).
+- `pysibs.threeds.build_browser_data()` — assembles EMVCo 3DS browser fields for the
+  3DS authentication payload.
+
+### Notes
+- Token/recurring request fields and endpoints are not fully public; `pay_with_token`
+  takes an opaque payload and `build_browser_data` uses EMVCo-standard names — verify
+  per integration.
+
 ## [0.3.0] - 2026-06-19
 
 Adds server-to-server card payments and 3D-Secure, grounded in the official SIBS
@@ -68,7 +88,8 @@ Grounded in a review of the official SIBS Gateway documentation
 - Full exception hierarchy under `SIBSError`; raw `httpx` errors never leak.
 - Documentation, examples (Django/FastAPI), CI and PyPI publish workflows.
 
-[Unreleased]: https://github.com/robertruben98/pysibs/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/robertruben98/pysibs/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/robertruben98/pysibs/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/robertruben98/pysibs/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/robertruben98/pysibs/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/robertruben98/pysibs/releases/tag/v0.1.0

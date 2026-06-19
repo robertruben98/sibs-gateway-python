@@ -17,7 +17,43 @@ from typing import Any
 from .exceptions import SIBSValidationError
 from .models import ActionResponse
 
-__all__ = ["build_3ds_redirect", "render_3ds_redirect_html"]
+__all__ = ["build_3ds_redirect", "render_3ds_redirect_html", "build_browser_data"]
+
+
+def build_browser_data(
+    *,
+    accept_header: str,
+    user_agent: str,
+    language: str = "en-US",
+    color_depth: int = 24,
+    screen_height: int,
+    screen_width: int,
+    timezone_offset: int = 0,
+    java_enabled: bool = False,
+    javascript_enabled: bool = True,
+) -> dict[str, Any]:
+    """Assemble the EMVCo 3DS browser data collected from the shopper's browser.
+
+    Returns a dict with the standard EMV 3DS field names. 3DS requires this device
+    information for the authentication request; collect the values client-side (the
+    ``Accept``/``User-Agent`` headers server-side) and include the result in your 3DS
+    payload for :meth:`~pysibs.client.SIBSClient.submit_3ds`.
+
+    .. note::
+       Field names follow the EMVCo 3DS spec. Confirm the exact nesting SIBS expects
+       for your integration and adjust before relying on it in production.
+    """
+    return {
+        "browserAcceptHeader": accept_header,
+        "browserUserAgent": user_agent,
+        "browserLanguage": language,
+        "browserColorDepth": str(color_depth),
+        "browserScreenHeight": str(screen_height),
+        "browserScreenWidth": str(screen_width),
+        "browserTZ": str(timezone_offset),
+        "browserJavaEnabled": java_enabled,
+        "browserJavascriptEnabled": javascript_enabled,
+    }
 
 
 def build_3ds_redirect(action: ActionResponse) -> dict[str, Any]:

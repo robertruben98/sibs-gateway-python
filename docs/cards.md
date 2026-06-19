@@ -64,6 +64,53 @@ else:
 - `render_3ds_redirect_html(action)` → a self-contained auto-submitting HTML page
   (all values HTML-escaped); return it as your response body.
 
+## Tokenization & recurring payments
+
+Ask SIBS to store a reusable token when paying, then charge it later (e.g. recurring /
+merchant-initiated) without handling the PAN again.
+
+```python
+# 1) Tokenize on a card payment:
+payment = client.create_payment(
+    amount="9.99", merchant_transaction_id="SUB-1",
+    payment_methods=["CARD"], tokenize=True,
+)
+result = client.pay_with_card(
+    payment_id=payment.id, transaction_signature=payment.signature, card={...}
+)
+if result.token:
+    store(result.token.value, result.token.expiry, result.token.masked_pan)
+
+# 2) Later, charge the stored token (opaque payload you build per your contract):
+later = client.create_payment(
+    amount="9.99", merchant_transaction_id="SUB-1-m2", payment_methods=["CARD"]
+)
+client.pay_with_token(
+    payment_id=later.id,
+    transaction_signature=later.signature,
+    payload={"token": {"value": "tok_..."}, "recurring": {"type": "FOLLOWING"}},
+)
+```
+
+The initial recurring may still trigger 3DS (`result.requires_3ds`); subsequent
+merchant-initiated charges typically do not.
+
+## 3DS browser data
+
+3DS authentication needs device/browser info. `build_browser_data(...)` assembles the
+EMVCo-standard fields to include in your `submit_3ds` payload:
+
+```python
+from pysibs import build_browser_data
+
+browser = build_browser_data(
+    accept_header=request.headers["Accept"],
+    user_agent=request.headers["User-Agent"],
+    screen_width=1920, screen_height=1080, timezone_offset=-60,
+)
+client.submit_3ds(payment_id=..., transaction_signature=..., data={"browser": browser})
+```
+
 ## Endpoint overrides
 
 `pay_with_card(..., path="card-id/purchase")` and `submit_3ds(..., path="card-id/3ds")`

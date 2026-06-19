@@ -25,9 +25,25 @@ __all__ = [
     "OperationResponse",
     "MBWayResponse",
     "ActionResponse",
+    "CardToken",
     "CardPaymentResponse",
     "WebhookEvent",
 ]
+
+
+class CardToken(BaseModel):
+    """A stored card token returned by SIBS when a card is tokenized.
+
+    Persist ``value`` (associated with your customer) to charge the card again later
+    via :meth:`pysibs.client.SIBSClient.pay_with_token`. Never store the PAN/CVV.
+    """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    value: str | None = None
+    expiry: str | None = None
+    masked_pan: str | None = None
+    raw: dict[str, Any] = Field(default_factory=dict)
 
 
 class ActionResponse(BaseModel):
@@ -69,6 +85,7 @@ class PaymentRequest(BaseModel):
     currency: str
     merchant_transaction_id: str
     transaction_type: str = "PURS"
+    tokenize: bool = False
     description: str | None = None
     return_url: str | None = None
     cancel_url: str | None = None
@@ -160,6 +177,7 @@ class CardPaymentResponse(BaseModel):
     status: PaymentStatus = PaymentStatus.UNKNOWN
     raw_status: str | None = None
     action: ActionResponse | None = None
+    token: CardToken | None = None
     raw_response: dict[str, Any] = Field(default_factory=dict)
 
     @property

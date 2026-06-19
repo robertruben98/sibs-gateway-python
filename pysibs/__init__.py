@@ -38,6 +38,7 @@ from .exceptions import (
 from .models import (
     ActionResponse,
     CardPaymentResponse,
+    CardToken,
     MBWayResponse,
     OperationResponse,
     PaymentReference,
@@ -49,7 +50,7 @@ from .models import (
     WebhookEvent,
 )
 from .money import format_amount, normalize_amount
-from .threeds import build_3ds_redirect, render_3ds_redirect_html
+from .threeds import build_3ds_redirect, build_browser_data, render_3ds_redirect_html
 from .webhooks import (
     build_acknowledgement,
     decrypt_webhook,
@@ -82,6 +83,7 @@ __all__ = [
     "OperationResponse",
     "MBWayResponse",
     "ActionResponse",
+    "CardToken",
     "CardPaymentResponse",
     "WebhookEvent",
     # Money
@@ -90,6 +92,7 @@ __all__ = [
     # 3D-Secure
     "build_3ds_redirect",
     "render_3ds_redirect_html",
+    "build_browser_data",
     # Webhooks
     "decrypt_webhook",
     "parse_webhook",

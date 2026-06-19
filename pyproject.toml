@@ -1,6 +1,6 @@
 [project]
 name = "pysibs"
-version = "0.3.0"
+version = "0.4.0"
 description = "A modern Python SDK for SIBS Gateway payment integrations."
 readme = "README.md"
 requires-python = ">=3.10"

@@ -112,6 +112,7 @@ class SIBSClient:
         currency: str = "EUR",
         merchant_transaction_id: str,
         transaction_type: str | TransactionType = TransactionType.PURCHASE,
+        tokenize: bool = False,
         description: str | None = None,
         return_url: str | None = None,
         cancel_url: str | None = None,
@@ -122,12 +123,15 @@ class SIBSClient:
 
         ``transaction_type`` is ``PURS`` (purchase, captured immediately) by default;
         pass ``AUTH`` to pre-authorize and capture later via :meth:`capture_payment`.
+        Set ``tokenize=True`` to ask SIBS to store a reusable card token on success
+        (read it from the card response's ``token``).
         """
         request = P.prepare_payment_request(
             amount=amount,
             currency=currency,
             merchant_transaction_id=merchant_transaction_id,
             transaction_type=transaction_type,
+            tokenize=tokenize,
             description=description,
             return_url=return_url,
             cancel_url=cancel_url,
@@ -218,6 +222,31 @@ class SIBSClient:
             transaction_signature=transaction_signature,
             path=path,
             body=P.build_card_payload(data),
+            idempotency_key=idempotency_key,
+        )
+
+    def pay_with_token(
+        self,
+        *,
+        payment_id: str,
+        transaction_signature: str,
+        payload: dict[str, object],
+        path: str = _CARD_PURCHASE_PATH,
+        idempotency_key: str | None = None,
+    ) -> CardPaymentResponse:
+        """Charge a previously stored card token (incl. recurring / merchant-initiated).
+
+        Create a payment first (with the ``CARD`` method), then submit an **opaque**
+        ``payload`` referencing the stored token — you build the exact body (token id,
+        and any initial/following recurring or MIT indicators) to match your verified
+        SIBS contract. Returns a :class:`CardPaymentResponse` (may still require 3DS for
+        an initial recurring).
+        """
+        return self._digest_post(
+            payment_id=payment_id,
+            transaction_signature=transaction_signature,
+            path=path,
+            body=P.build_card_payload(payload),
             idempotency_key=idempotency_key,
         )
 
