@@ -42,7 +42,7 @@ def test_create_payment_no_tokenisation_by_default(client: SIBSClient) -> None:
 
 @respx.mock
 def test_pay_with_card_parses_token(client: SIBSClient) -> None:
-    respx.post(f"{BASE}/payments/tx_1/card-id/purchase").mock(
+    respx.post(f"{BASE}/payments/tx_1/card/purchase").mock(
         return_value=httpx.Response(
             200,
             json={
@@ -64,8 +64,35 @@ def test_pay_with_card_parses_token(client: SIBSClient) -> None:
 
 
 @respx.mock
+def test_pay_with_card_parses_token_list(client: SIBSClient) -> None:
+    # Official response shape: token carried in tokenList[] with capital-PAN masking.
+    respx.post(f"{BASE}/payments/tx_1/card/purchase").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "transactionID": "tx_1",
+                "paymentStatus": "Success",
+                "tokenList": [
+                    {
+                        "value": "tok_list_1",
+                        "expireDate": "2031-08",
+                        "maskedPAN": "411111******4242",
+                        "tokenType": "CARD",
+                    }
+                ],
+            },
+        )
+    )
+    result = client.pay_with_card(payment_id="tx_1", transaction_signature="sig", card=CARD)
+    assert result.token is not None
+    assert result.token.value == "tok_list_1"
+    assert result.token.expiry == "2031-08"
+    assert result.token.masked_pan == "411111******4242"
+
+
+@respx.mock
 def test_pay_with_card_token_as_string(client: SIBSClient) -> None:
-    respx.post(f"{BASE}/payments/tx_1/card-id/purchase").mock(
+    respx.post(f"{BASE}/payments/tx_1/card/purchase").mock(
         return_value=httpx.Response(200, json={"paymentStatus": "Success", "token": "tok_plain"})
     )
     result = client.pay_with_card(payment_id="tx_1", transaction_signature="sig", card=CARD)
@@ -75,7 +102,7 @@ def test_pay_with_card_token_as_string(client: SIBSClient) -> None:
 
 @respx.mock
 def test_pay_with_card_no_token(client: SIBSClient) -> None:
-    respx.post(f"{BASE}/payments/tx_1/card-id/purchase").mock(
+    respx.post(f"{BASE}/payments/tx_1/card/purchase").mock(
         return_value=httpx.Response(200, json={"paymentStatus": "Success"})
     )
     result = client.pay_with_card(payment_id="tx_1", transaction_signature="sig", card=CARD)
@@ -84,7 +111,7 @@ def test_pay_with_card_no_token(client: SIBSClient) -> None:
 
 @respx.mock
 def test_pay_with_token(client: SIBSClient) -> None:
-    route = respx.post(f"{BASE}/payments/tx_2/card-id/purchase").mock(
+    route = respx.post(f"{BASE}/payments/tx_2/token/purchase").mock(
         return_value=httpx.Response(200, json={"transactionID": "tx_2", "paymentStatus": "Success"})
     )
     result = client.pay_with_token(
@@ -105,7 +132,7 @@ def test_pay_with_token_rejects_empty(client: SIBSClient) -> None:
 
 @respx.mock
 async def test_async_pay_with_token() -> None:
-    respx.post(f"{BASE}/payments/tx_a/card-id/purchase").mock(
+    respx.post(f"{BASE}/payments/tx_a/token/purchase").mock(
         return_value=httpx.Response(200, json={"paymentStatus": "Success"})
     )
     async with AsyncSIBSClient(api_key="k", terminal_id="t", base_url=BASE) as client:

@@ -63,10 +63,28 @@ def _b64decode(value: str | bytes, field: str) -> bytes:
 
 
 def _coerce_key(secret: str | bytes) -> bytes:
-    key = secret.encode("utf-8") if isinstance(secret, str) else bytes(secret)
+    """Derive the raw AES key from the SIBS Backoffice secret.
+
+    The secret configured in the SIBS Backoffice is a **base64-encoded** string; the
+    official SIBS samples (Python/Java/C#/PHP) all base64-*decode* it to obtain the raw
+    AES key bytes before constructing the cipher. A ``str`` is therefore treated as that
+    base64 secret and decoded here. ``bytes`` are taken as an already-decoded raw key, so
+    advanced callers can pass key material directly.
+    """
+    if isinstance(secret, str):
+        try:
+            key = base64.b64decode(secret, validate=True)
+        except (ValueError, TypeError) as exc:
+            raise SIBSConfigurationError(
+                "Webhook secret must be the base64 key from the SIBS Backoffice "
+                "(it is base64-decoded to the raw AES key). The value provided is not "
+                "valid base64; pass raw key bytes if you have already decoded it."
+            ) from exc
+    else:
+        key = bytes(secret)
     if len(key) not in _VALID_AES_KEY_LENGTHS:
         raise SIBSConfigurationError(
-            "Webhook secret key must be 16, 24 or 32 bytes for AES-GCM "
+            "Webhook secret key must decode to 16, 24 or 32 bytes for AES-GCM "
             f"(got {len(key)} bytes). Use the key configured in the SIBS Backoffice."
         )
     return key

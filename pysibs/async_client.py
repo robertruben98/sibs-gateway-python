@@ -30,9 +30,12 @@ from .validators import validate_mbway_phone, validate_payment_id
 
 __all__ = ["AsyncSIBSClient"]
 
-# See pysibs.client for notes on these (unverified) default card endpoints.
-_CARD_PURCHASE_PATH = "card-id/purchase"
-_CARD_3DS_PATH = "card-id/3ds"
+# Reuse the sync client's confirmed default endpoints to avoid drift.
+from .client import (  # noqa: E402
+    _CARD_3DS_PATH,
+    _CARD_PURCHASE_PATH,
+    _CARD_TOKEN_PATH,
+)
 
 
 class AsyncSIBSClient:
@@ -223,7 +226,7 @@ class AsyncSIBSClient:
         payment_id: str,
         transaction_signature: str,
         payload: dict[str, object],
-        path: str = _CARD_PURCHASE_PATH,
+        path: str = _CARD_TOKEN_PATH,
         idempotency_key: str | None = None,
     ) -> CardPaymentResponse:
         """Charge a stored card token. See

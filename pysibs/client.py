@@ -25,10 +25,17 @@ from .validators import validate_mbway_phone, validate_payment_id
 
 __all__ = ["SIBSClient"]
 
-# Default card endpoints (analogous to the MB WAY path). NOTE: the exact card/3DS paths
-# are not fully documented publicly -- override via the ``path`` argument if needed.
-_CARD_PURCHASE_PATH = "card-id/purchase"
-_CARD_3DS_PATH = "card-id/3ds"
+# Default card / token endpoints (relative to the ``/sibs/spg/v2`` base path), confirmed
+# against the official SIBS documentation (docs.pay.sibs.com):
+#   * card payments POST to ``payments/{id}/card/purchase``;
+#   * stored-token charges POST to ``payments/{id}/token/purchase``.
+# 3D-Secure is *not* a separate endpoint: the browser/device data is sent inside the
+# ``card/purchase`` request (under ``info.deviceInfo``); a ``Partial`` status returns an
+# ``actionResponse`` challenge to redirect the shopper. The exact body to *resubmit*
+# after the challenge is not fully public, so ``submit_3ds`` keeps an overridable path.
+_CARD_PURCHASE_PATH = "card/purchase"
+_CARD_TOKEN_PATH = "token/purchase"
+_CARD_3DS_PATH = "card/purchase"
 
 
 class SIBSClient:
@@ -226,10 +233,15 @@ class SIBSClient:
         path: str = _CARD_3DS_PATH,
         idempotency_key: str | None = None,
     ) -> CardPaymentResponse:
-        """Submit the 3D-Secure authentication step for a card payment.
+        """Submit the 3D-Secure step for a card payment.
 
-        ``data`` is an opaque payload (e.g. browser/challenge data) per your verified
-        contract. Returns the updated :class:`CardPaymentResponse`.
+        Note that SIBS collects 3DS browser/device data inside the original
+        ``card/purchase`` request (under ``info.deviceInfo`` — see
+        :func:`pysibs.threeds.build_browser_data`); a ``Partial`` status then returns an
+        ``actionResponse`` to redirect the shopper. This method posts the *resubmit* after
+        the challenge. The exact resubmit body/endpoint is not fully public, so ``data``
+        is an opaque payload and ``path`` is overridable. Returns the updated
+        :class:`CardPaymentResponse`.
         """
         return self._digest_post(
             payment_id=payment_id,
@@ -245,16 +257,20 @@ class SIBSClient:
         payment_id: str,
         transaction_signature: str,
         payload: dict[str, object],
-        path: str = _CARD_PURCHASE_PATH,
+        path: str = _CARD_TOKEN_PATH,
         idempotency_key: str | None = None,
     ) -> CardPaymentResponse:
         """Charge a previously stored card token (incl. recurring / merchant-initiated).
 
         Create a payment first (with the ``CARD`` method), then submit an **opaque**
-        ``payload`` referencing the stored token — you build the exact body (token id,
-        and any initial/following recurring or MIT indicators) to match your verified
-        SIBS contract. Returns a :class:`CardPaymentResponse` (may still require 3DS for
-        an initial recurring).
+        ``payload`` referencing the stored token — you build the exact body to match your
+        verified SIBS contract. Per the official docs the token is referenced under
+        ``tokenInfo`` (``value`` + ``tokenType``, and ``secureCode`` when required) and a
+        merchant-initiated charge carries ``merchantInitiatedTransaction`` (e.g.
+        ``type="UCOF"``); follow-up recurring charges target ``.../recurring`` referencing
+        the original transaction. Defaults to ``token/purchase``; override ``path`` for
+        the recurring endpoint. Returns a :class:`CardPaymentResponse` (may still require
+        3DS for an initial recurring).
         """
         return self._digest_post(
             payment_id=payment_id,
