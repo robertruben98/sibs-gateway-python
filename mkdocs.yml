@@ -1,0 +1,48 @@
+site_name: sibs-gateway-python
+site_description: Modern Python SDK for the SIBS Gateway APIs — payments, refunds, captures, webhook verification.
+repo_url: https://github.com/robertruben98/sibs-gateway-python
+repo_name: robertruben98/sibs-gateway-python
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: black
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [.]
+          options:
+            show_root_heading: true
+            show_source: false
+            members_order: source
+
+exclude_docs: |
+  internal-notes.md
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - Configuration: configuration.md
+  - Payments: payments.md
+  - Refunds: refunds.md
+  - Cards: cards.md
+  - Webhooks: webhooks.md
+  - Errors: errors.md
+  - Django: django.md
+  - FastAPI: fastapi.md
+  - API reference: api.md

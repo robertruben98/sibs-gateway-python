@@ -1,5 +1,7 @@
 # PySIBS
 
+[![Docs](https://img.shields.io/badge/docs-online-blue)](https://robertruben98.github.io/sibs-gateway-python/)
+
 A modern, typed, developer-friendly Python SDK for [SIBS Gateway](https://www.sibsapimarket.com/) payment integrations.
 
 PySIBS provides a clean API for payments, refunds, captures, cancellations, status
