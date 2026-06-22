@@ -1,0 +1,4498 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Modern Python SDK for the SIBS Gateway APIs — payments, refunds, captures, webhook verification.">
+      
+      
+      
+      
+        <link rel="prev" href="../fastapi/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>API reference - sibs-gateway-python</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#api-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="sibs-gateway-python" class="md-header__button md-logo" aria-label="sibs-gateway-python" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            sibs-gateway-python
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              API reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/robertruben98/sibs-gateway-python" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    robertruben98/sibs-gateway-python
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="sibs-gateway-python" class="md-nav__button md-logo" aria-label="sibs-gateway-python" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    sibs-gateway-python
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/robertruben98/sibs-gateway-python" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    robertruben98/sibs-gateway-python
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../payments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Payments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../refunds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Refunds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../webhooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Webhooks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../errors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Errors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../django/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Django
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fastapi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pysibs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pysibs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pysibs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.RetryConfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RetryConfig
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="RetryConfig">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.RetryConfig.should_retry_status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        should_retry_status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.RetryConfig.should_retry_exception" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        should_retry_exception
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.RetryConfig.backoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        backoff
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.AsyncSIBSClient" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AsyncSIBSClient
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="AsyncSIBSClient">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.AsyncSIBSClient.pay_with_mbway" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pay_with_mbway
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.AsyncSIBSClient.pay_with_card" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pay_with_card
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.AsyncSIBSClient.submit_3ds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        submit_3ds
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.AsyncSIBSClient.pay_with_token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pay_with_token
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSClient
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SIBSClient">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.from_env" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        from_env
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.create_payment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create_payment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.pay_with_mbway" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pay_with_mbway
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.pay_with_card" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pay_with_card
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.submit_3ds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        submit_3ds
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.pay_with_token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pay_with_token
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.get_payment_status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_payment_status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.refund_payment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        refund_payment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.capture_payment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        capture_payment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.cancel_payment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cancel_payment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.close" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        close
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.ClientConfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ClientConfig
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ClientConfig">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.ClientConfig.from_env" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        from_env
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSEnvironment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSEnvironment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SIBSEnvironment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSEnvironment.coerce" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        coerce
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.PaymentMethod" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PaymentMethod
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.PaymentStatus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PaymentStatus
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.TransactionType" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TransactionType
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSAPIError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSAPIError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSAuthenticationError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSAuthenticationError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSConfigurationError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSConfigurationError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSConnectionError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSConnectionError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSInvalidWebhookSignature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSInvalidWebhookSignature
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSRateLimitError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSRateLimitError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSTimeoutError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSTimeoutError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSValidationError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSValidationError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.ActionResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ActionResponse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.CardPaymentResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CardPaymentResponse
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CardPaymentResponse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.CardPaymentResponse.requires_3ds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        requires_3ds
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.CardToken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CardToken
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.MBWayResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MBWayResponse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.OperationResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OperationResponse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.PaymentReference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PaymentReference
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.PaymentRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PaymentRequest
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.PaymentResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PaymentResponse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.PaymentStatusResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PaymentStatusResponse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.RefundRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RefundRequest
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.RefundResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RefundResponse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.WebhookEvent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        WebhookEvent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.NotificationDeduplicator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NotificationDeduplicator
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="NotificationDeduplicator">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.NotificationDeduplicator.is_duplicate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        is_duplicate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.NotificationDeduplicator.seen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        seen
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.normalize_payment_status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        normalize_payment_status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.format_amount" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        format_amount
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.normalize_amount" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        normalize_amount
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.mask_pan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mask_pan
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.redact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        redact
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.build_3ds_redirect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        build_3ds_redirect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.build_3ds_resubmit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        build_3ds_resubmit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.build_browser_data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        build_browser_data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.render_3ds_redirect_html" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        render_3ds_redirect_html
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.build_acknowledgement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        build_acknowledgement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.decrypt_webhook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        decrypt_webhook
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.hmac_sha256_verifier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hmac_sha256_verifier
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.parse_webhook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parse_webhook
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.verify_webhook_signature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        verify_webhook_signature
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pysibs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pysibs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pysibs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.RetryConfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RetryConfig
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="RetryConfig">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.RetryConfig.should_retry_status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        should_retry_status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.RetryConfig.should_retry_exception" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        should_retry_exception
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.RetryConfig.backoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        backoff
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.AsyncSIBSClient" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AsyncSIBSClient
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="AsyncSIBSClient">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.AsyncSIBSClient.pay_with_mbway" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pay_with_mbway
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.AsyncSIBSClient.pay_with_card" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pay_with_card
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.AsyncSIBSClient.submit_3ds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        submit_3ds
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.AsyncSIBSClient.pay_with_token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pay_with_token
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSClient
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SIBSClient">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.from_env" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        from_env
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.create_payment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create_payment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.pay_with_mbway" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pay_with_mbway
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.pay_with_card" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pay_with_card
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.submit_3ds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        submit_3ds
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.pay_with_token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pay_with_token
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.get_payment_status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_payment_status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.refund_payment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        refund_payment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.capture_payment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        capture_payment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.cancel_payment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cancel_payment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSClient.close" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        close
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.ClientConfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ClientConfig
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ClientConfig">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.ClientConfig.from_env" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        from_env
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSEnvironment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSEnvironment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SIBSEnvironment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSEnvironment.coerce" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        coerce
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.PaymentMethod" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PaymentMethod
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.PaymentStatus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PaymentStatus
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.TransactionType" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TransactionType
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSAPIError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSAPIError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSAuthenticationError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSAuthenticationError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSConfigurationError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSConfigurationError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSConnectionError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSConnectionError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSInvalidWebhookSignature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSInvalidWebhookSignature
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSRateLimitError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSRateLimitError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSTimeoutError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSTimeoutError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.SIBSValidationError" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SIBSValidationError
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.ActionResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ActionResponse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.CardPaymentResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CardPaymentResponse
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CardPaymentResponse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.CardPaymentResponse.requires_3ds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        requires_3ds
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.CardToken" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CardToken
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.MBWayResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MBWayResponse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.OperationResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OperationResponse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.PaymentReference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PaymentReference
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.PaymentRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PaymentRequest
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.PaymentResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PaymentResponse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.PaymentStatusResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PaymentStatusResponse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.RefundRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RefundRequest
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.RefundResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RefundResponse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.WebhookEvent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        WebhookEvent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.NotificationDeduplicator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NotificationDeduplicator
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="NotificationDeduplicator">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.NotificationDeduplicator.is_duplicate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        is_duplicate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.NotificationDeduplicator.seen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        seen
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.normalize_payment_status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        normalize_payment_status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.format_amount" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        format_amount
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.normalize_amount" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        normalize_amount
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.mask_pan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mask_pan
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.redact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        redact
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.build_3ds_redirect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        build_3ds_redirect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.build_3ds_resubmit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        build_3ds_resubmit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.build_browser_data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        build_browser_data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.render_3ds_redirect_html" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        render_3ds_redirect_html
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.build_acknowledgement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        build_acknowledgement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.decrypt_webhook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        decrypt_webhook
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.hmac_sha256_verifier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hmac_sha256_verifier
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.parse_webhook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parse_webhook
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pysibs.verify_webhook_signature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        verify_webhook_signature
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="api-reference">API reference</h1>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="pysibs" class="doc doc-heading">
+            <code>pysibs</code>
+
+
+</h2>
+
+    <div class="doc doc-contents first">
+
+        <p>PySIBS -- a modern Python SDK for SIBS Gateway payment integrations.</p>
+<p>Typical usage::</p>
+<pre><code>from pysibs import SIBSClient
+
+client = SIBSClient(api_key="...", terminal_id="...", environment="sandbox")
+payment = client.create_payment(
+    amount="25.50",
+    currency="EUR",
+    merchant_transaction_id="ORD-1001",
+)
+print(payment.status, payment.redirect_url)
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.RetryConfig" class="doc doc-heading">
+            <code>RetryConfig</code>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Configuration for automatic retries.</p>
+<p><code>max_retries</code> is the number of <em>additional</em> attempts after the first try (so
+<code>max_retries=2</code> means up to 3 requests). Set it to <code>0</code> to disable retries.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.RetryConfig.should_retry_status" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">should_retry_status</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">attempt</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Whether to retry given an HTTP status on attempt <code>attempt</code> (0-based).</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.RetryConfig.should_retry_exception" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">should_retry_exception</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">attempt</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Whether to retry a connection/timeout error. Idempotent methods only.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.RetryConfig.backoff" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">backoff</span><span class="p">(</span><span class="n">attempt</span><span class="p">,</span> <span class="n">retry_after</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Seconds to sleep before the next attempt (<code>attempt</code> is 0-based).</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.AsyncSIBSClient" class="doc doc-heading">
+            <code>AsyncSIBSClient</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Asynchronous client for the SIBS Gateway API.</p>
+<p>Use as an async context manager to ensure the connection pool is closed::</p>
+<pre><code>async with AsyncSIBSClient(api_key=..., terminal_id=...) as client:
+    await client.create_payment(...)
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.AsyncSIBSClient.pay_with_mbway" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">pay_with_mbway</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">payment_id</span><span class="p">,</span> <span class="n">transaction_signature</span><span class="p">,</span> <span class="n">customer_phone</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-async"><code>async</code></small>
+  </span>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Trigger an MB WAY purchase on a previously created payment.</p>
+<p>See :meth:<code>pysibs.client.SIBSClient.pay_with_mbway</code> for details. This call
+authenticates with <code>Authorization: Digest</code> rather than the bearer token.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.AsyncSIBSClient.pay_with_card" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">pay_with_card</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">payment_id</span><span class="p">,</span> <span class="n">transaction_signature</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">_CARD_PURCHASE_PATH</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-async"><code>async</code></small>
+  </span>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Submit a server-to-server card payment. See
+:meth:<code>pysibs.client.SIBSClient.pay_with_card</code> for details and the PCI warning.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.AsyncSIBSClient.submit_3ds" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">submit_3ds</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">payment_id</span><span class="p">,</span> <span class="n">transaction_signature</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">_CARD_3DS_PATH</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-async"><code>async</code></small>
+  </span>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Submit the 3D-Secure authentication step for a card payment.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.AsyncSIBSClient.pay_with_token" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">pay_with_token</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">payment_id</span><span class="p">,</span> <span class="n">transaction_signature</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">_CARD_TOKEN_PATH</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-async"><code>async</code></small>
+  </span>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Charge a stored card token. See
+:meth:<code>pysibs.client.SIBSClient.pay_with_token</code> for details.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.SIBSClient" class="doc doc-heading">
+            <code>SIBSClient</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>A synchronous client for the SIBS Gateway API.</p>
+<p>The client is framework-agnostic and safe to share across requests. It can be used
+as a context manager to ensure the underlying HTTP connection pool is closed::</p>
+<pre><code>with SIBSClient(api_key=..., terminal_id=...) as client:
+    client.create_payment(...)
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.SIBSClient.from_env" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">from_env</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_TIMEOUT</span><span class="p">,</span> <span class="n">retries</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">proxy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">base_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">idempotency_header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transport</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Construct a client from <code>SIBS_*</code> environment variables.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.SIBSClient.create_payment" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">create_payment</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">currency</span><span class="o">=</span><span class="s1">&#39;EUR&#39;</span><span class="p">,</span> <span class="n">merchant_transaction_id</span><span class="p">,</span> <span class="n">transaction_type</span><span class="o">=</span><span class="n">TransactionType</span><span class="o">.</span><span class="n">PURCHASE</span><span class="p">,</span> <span class="n">tokenize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cancel_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">payment_methods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create a payment and return a typed :class:<code>PaymentResponse</code>.</p>
+<p><code>transaction_type</code> is <code>PURS</code> (purchase, captured immediately) by default;
+pass <code>AUTH</code> to pre-authorize and capture later via :meth:<code>capture_payment</code>.
+Set <code>tokenize=True</code> to ask SIBS to store a reusable card token on success
+(read it from the card response's <code>token</code>).</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.SIBSClient.pay_with_mbway" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">pay_with_mbway</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">payment_id</span><span class="p">,</span> <span class="n">transaction_signature</span><span class="p">,</span> <span class="n">customer_phone</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Trigger an MB WAY purchase on a previously created payment.</p>
+<p>This is the second step of the MB WAY flow: after :meth:<code>create_payment</code> with
+the <code>MBWAY</code> method, call this with the <code>transaction_signature</code> from that
+response and the shopper's <code>customer_phone</code> (format <code>"351#911234567"</code>). SIBS
+then pushes a payment request to the MB WAY app; the final outcome arrives via
+webhook. This call authenticates with <code>Authorization: Digest</code> rather than the
+client's bearer token.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.SIBSClient.pay_with_card" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">pay_with_card</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">payment_id</span><span class="p">,</span> <span class="n">transaction_signature</span><span class="p">,</span> <span class="n">card</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">_CARD_PURCHASE_PATH</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Submit a server-to-server card payment on a created payment.</p>
+<p><code>card</code> is an <strong>opaque</strong> payload that you build to match your verified SIBS
+contract — PySIBS does not model raw PAN/CVV fields. The result may require a
+3D-Secure step: when <code>response.requires_3ds</code> is true, use <code>response.action</code>
+with :mod:<code>pysibs.threeds</code> to redirect the shopper, then call
+:meth:<code>submit_3ds</code>.</p>
+<p>.. warning::
+   Transmitting raw card data brings your environment into PCI DSS scope.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.SIBSClient.submit_3ds" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">submit_3ds</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">payment_id</span><span class="p">,</span> <span class="n">transaction_signature</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">_CARD_3DS_PATH</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Resubmit a card payment after the 3D-Secure challenge completes.</p>
+<p>SIBS has no separate 3DS endpoint: 3DS browser/device data is sent inside the
+original <code>card/purchase</code> request (under <code>info.deviceInfo</code> — see
+:func:<code>pysibs.threeds.build_browser_data</code>); a <code>Partial</code> status returns an
+<code>actionResponse</code> to redirect the shopper. Once the challenge is done you call
+this method (it posts back to <code>card/purchase</code>) with an <code>actionProcessed</code> body
+echoing the challenge id — build it with
+:func:<code>pysibs.threeds.build_3ds_resubmit(response.action)</code>. Returns the updated
+:class:<code>CardPaymentResponse</code>.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.SIBSClient.pay_with_token" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">pay_with_token</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">payment_id</span><span class="p">,</span> <span class="n">transaction_signature</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">_CARD_TOKEN_PATH</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Charge a previously stored card token (incl. recurring / merchant-initiated).</p>
+<p>Create a payment first (with the <code>CARD</code> method), then submit an <strong>opaque</strong>
+<code>payload</code> referencing the stored token — you build the exact body to match your
+verified SIBS contract. Per the official docs the token is referenced under
+<code>tokenInfo</code> (<code>value</code> + <code>tokenType</code>, and <code>secureCode</code> when required) and a
+merchant-initiated charge carries <code>merchantInitiatedTransaction</code> (e.g.
+<code>type="UCOF"</code>); follow-up recurring charges target <code>.../recurring</code> referencing
+the original transaction. Defaults to <code>token/purchase</code>; override <code>path</code> for
+the recurring endpoint. Returns a :class:<code>CardPaymentResponse</code> (may still require
+3DS for an initial recurring).</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.SIBSClient.get_payment_status" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_payment_status</span><span class="p">(</span><span class="n">payment_id</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Query the current status of a payment.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.SIBSClient.refund_payment" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">refund_payment</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">payment_id</span><span class="p">,</span> <span class="n">amount</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">currency</span><span class="o">=</span><span class="s1">&#39;EUR&#39;</span><span class="p">,</span> <span class="n">merchant_refund_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Refund a payment, fully (<code>amount=None</code>) or partially.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.SIBSClient.capture_payment" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">capture_payment</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">payment_id</span><span class="p">,</span> <span class="n">amount</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">currency</span><span class="o">=</span><span class="s1">&#39;EUR&#39;</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Capture a previously authorized payment, fully or partially.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.SIBSClient.cancel_payment" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">cancel_payment</span><span class="p">(</span><span class="n">payment_id</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Cancel / void a payment.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.SIBSClient.close" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">close</span><span class="p">()</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Close the underlying HTTP connection pool.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.ClientConfig" class="doc doc-heading">
+            <code>ClientConfig</code>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Resolved, validated configuration for a :class:<code>~pysibs.client.SIBSClient</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.ClientConfig.from_env" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">from_env</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_TIMEOUT</span><span class="p">,</span> <span class="n">base_url</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Build configuration from <code>SIBS_*</code> environment variables.</p>
+<p>Reads <code>SIBS_API_KEY</code>, <code>SIBS_TERMINAL_ID</code>, <code>SIBS_ENVIRONMENT</code>
+(defaults to <code>sandbox</code>), and optionally <code>SIBS_CLIENT_ID</code> and
+<code>SIBS_WEBHOOK_SECRET</code>.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.SIBSEnvironment" class="doc doc-heading">
+            <code>SIBSEnvironment</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="str">str</span></code>, <code><span title="enum.Enum">Enum</span></code></p>
+
+
+
+        <p>Supported SIBS environments.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.SIBSEnvironment.coerce" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">coerce</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Coerce a string (case-insensitive) or enum member into an environment.</p>
+<p>Raises :class:<code>SIBSConfigurationError</code> for unknown values.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.PaymentMethod" class="doc doc-heading">
+            <code>PaymentMethod</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="str">str</span></code>, <code><span title="enum.Enum">Enum</span></code></p>
+
+
+
+        <p>Payment methods supported by SIBS Gateway.</p>
+<p>The wire value for a MULTIBANCO reference payment is <code>"REFERENCE"</code>. <code>MULTIBANCO</code>
+is kept as a backwards-compatible alias of <code>REFERENCE</code> (same value).</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.PaymentStatus" class="doc doc-heading">
+            <code>PaymentStatus</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="str">str</span></code>, <code><span title="enum.Enum">Enum</span></code></p>
+
+
+
+        <p>Normalized payment lifecycle states.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.TransactionType" class="doc doc-heading">
+            <code>TransactionType</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="str">str</span></code>, <code><span title="enum.Enum">Enum</span></code></p>
+
+
+
+        <p>SIBS transaction types: a purchase captures immediately, an authorization holds
+the amount until a capture is performed.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.SIBSAPIError" class="doc doc-heading">
+            <code>SIBSAPIError</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="SIBSError (pysibs.exceptions.SIBSError)" href="#pysibs.SIBSError">SIBSError</a></code></p>
+
+
+
+        <p>Raised when SIBS returns an error response we cannot map to anything more specific.</p>
+<p>The HTTP status code and the (best-effort parsed) response body are attached so
+callers can inspect them. Note that <code>response_body</code> never contains the request
+payload, so credentials are not leaked through this exception.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.SIBSAuthenticationError" class="doc doc-heading">
+            <code>SIBSAuthenticationError</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="SIBSError (pysibs.exceptions.SIBSError)" href="#pysibs.SIBSError">SIBSError</a></code></p>
+
+
+
+        <p>Raised when SIBS rejects the credentials (HTTP 401 / 403).</p>
+
+
+
+
+
+
+
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.SIBSConfigurationError" class="doc doc-heading">
+            <code>SIBSConfigurationError</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="SIBSError (pysibs.exceptions.SIBSError)" href="#pysibs.SIBSError">SIBSError</a></code></p>
+
+
+
+        <p>Raised when the client is misconfigured (missing credentials, bad env...).</p>
+
+
+
+
+
+
+
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.SIBSConnectionError" class="doc doc-heading">
+            <code>SIBSConnectionError</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="SIBSError (pysibs.exceptions.SIBSError)" href="#pysibs.SIBSError">SIBSError</a></code></p>
+
+
+
+        <p>Raised when we cannot reach SIBS at all (DNS, TCP, TLS...).</p>
+
+
+
+
+
+
+
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.SIBSError" class="doc doc-heading">
+            <code>SIBSError</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="Exception">Exception</span></code></p>
+
+
+
+        <p>Base class for every exception raised by PySIBS.</p>
+
+
+
+
+
+
+
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.SIBSInvalidWebhookSignature" class="doc doc-heading">
+            <code>SIBSInvalidWebhookSignature</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="SIBSError (pysibs.exceptions.SIBSError)" href="#pysibs.SIBSError">SIBSError</a></code></p>
+
+
+
+        <p>Raised when a webhook payload fails signature verification.</p>
+
+
+
+
+
+
+
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.SIBSRateLimitError" class="doc doc-heading">
+            <code>SIBSRateLimitError</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="SIBSAPIError (pysibs.exceptions.SIBSAPIError)" href="#pysibs.SIBSAPIError">SIBSAPIError</a></code></p>
+
+
+
+        <p>Raised when SIBS returns HTTP 429 (too many requests).</p>
+<p>Subclasses :class:<code>SIBSAPIError</code> for backwards compatibility. <code>retry_after</code> is the
+number of seconds the server asked us to wait (from the <code>Retry-After</code> header), if
+provided.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.SIBSTimeoutError" class="doc doc-heading">
+            <code>SIBSTimeoutError</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="SIBSError (pysibs.exceptions.SIBSError)" href="#pysibs.SIBSError">SIBSError</a></code></p>
+
+
+
+        <p>Raised when a request to SIBS times out (connect/read/write).</p>
+
+
+
+
+
+
+
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.SIBSValidationError" class="doc doc-heading">
+            <code>SIBSValidationError</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="SIBSError (pysibs.exceptions.SIBSError)" href="#pysibs.SIBSError">SIBSError</a></code></p>
+
+
+
+        <p>Raised when user-supplied input fails validation before hitting the API.</p>
+
+
+
+
+
+
+
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.ActionResponse" class="doc doc-heading">
+            <code>ActionResponse</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+
+        <p>A follow-up action SIBS asks the merchant to perform.</p>
+<p>For card payments this carries the 3D-Secure redirect: the shopper's browser must
+be sent (usually via an auto-submitting POST form) to <code>url</code> with <code>params</code> as
+form fields. See :func:<code>pysibs.threeds.build_3ds_redirect</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.CardPaymentResponse" class="doc doc-heading">
+            <code>CardPaymentResponse</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+
+        <p>Result of submitting a card payment.</p>
+<p>When <code>status</code> is :attr:<code>PaymentStatus.ACTION_REQUIRED</code> (SIBS <code>"Partial"</code>), a 3DS
+authentication is required: inspect <code>action</code> for the redirect details and resubmit
+the payment afterwards.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="pysibs.CardPaymentResponse.requires_3ds" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">requires_3ds</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>True when a 3D-Secure authentication step is required.</p>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.CardToken" class="doc doc-heading">
+            <code>CardToken</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+
+        <p>A stored card token returned by SIBS when a card is tokenized.</p>
+<p>Persist <code>value</code> (associated with your customer) to charge the card again later
+via :meth:<code>pysibs.client.SIBSClient.pay_with_token</code>. Never store the PAN/CVV.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.MBWayResponse" class="doc doc-heading">
+            <code>MBWayResponse</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+
+        <p>Result of triggering an MB WAY purchase on a created payment.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.OperationResponse" class="doc doc-heading">
+            <code>OperationResponse</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+
+        <p>Generic result for capture / cancel operations.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.PaymentReference" class="doc doc-heading">
+            <code>PaymentReference</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+
+        <p>A MULTIBANCO reference returned by SIBS (entity + reference the shopper pays).</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.PaymentRequest" class="doc doc-heading">
+            <code>PaymentRequest</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+
+        <p>Validated input for creating a payment.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.PaymentResponse" class="doc doc-heading">
+            <code>PaymentResponse</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+
+        <p>Result of creating a payment.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.PaymentStatusResponse" class="doc doc-heading">
+            <code>PaymentStatusResponse</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+
+        <p>Result of querying a payment's status.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.RefundRequest" class="doc doc-heading">
+            <code>RefundRequest</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+
+        <p>Validated input for refunding a payment.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.RefundResponse" class="doc doc-heading">
+            <code>RefundResponse</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+
+        <p>Result of a refund operation.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.WebhookEvent" class="doc doc-heading">
+            <code>WebhookEvent</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+
+        <p>A parsed (and decrypted) webhook notification.</p>
+<p><code>notification_id</code> must be echoed back in the HTTP 200 acknowledgement so SIBS
+does not retry the notification (see :func:<code>pysibs.webhooks.build_acknowledgement</code>).</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="pysibs.NotificationDeduplicator" class="doc doc-heading">
+            <code>NotificationDeduplicator</code>
+
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>In-memory guard against processing the same webhook notification twice.</p>
+<p>SIBS retries notifications until acknowledged, so the same <code>notificationID</code> can
+arrive more than once. Call :meth:<code>seen</code> (or :meth:<code>is_duplicate</code>) keyed on the
+notification id before acting on an event::</p>
+<pre><code>dedup = NotificationDeduplicator()           # module/app-level singleton
+if dedup.seen(event.notification_id):
+    return ack                               # already processed; just ack
+</code></pre>
+<p>This is a process-local, bounded LRU set — fine for a single worker. For multiple
+workers/instances, back the dedupe with a shared store (Redis, DB) instead; this
+class documents the contract such a store should implement.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.NotificationDeduplicator.is_duplicate" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">is_duplicate</span><span class="p">(</span><span class="n">notification_id</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return True if this id was already recorded (without recording it).</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="pysibs.NotificationDeduplicator.seen" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">seen</span><span class="p">(</span><span class="n">notification_id</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Record <code>notification_id</code> and return whether it had been seen before.</p>
+<p>A <code>None</code> id is treated as never-seen (cannot dedupe without an id).</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pysibs.normalize_payment_status" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">normalize_payment_status</span><span class="p">(</span><span class="n">raw_status</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Map a raw SIBS status string onto a normalized :class:<code>PaymentStatus</code>.</p>
+<p>Never raises. Unrecognised or empty values map to :attr:<code>PaymentStatus.UNKNOWN</code>.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pysibs.format_amount" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">format_amount</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">currency</span><span class="o">=</span><span class="s1">&#39;EUR&#39;</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Normalize and render an amount as a fixed-point string (e.g. <code>"25.50"</code>).</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pysibs.normalize_amount" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">normalize_amount</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">currency</span><span class="o">=</span><span class="s1">&#39;EUR&#39;</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Normalize an amount to a :class:<code>Decimal</code> quantized for <code>currency</code>.</p>
+<p>Accepts <code>str</code>, <code>int</code> or <code>Decimal</code>. Rejects <code>float</code> and <code>bool</code> with a
+:class:<code>SIBSValidationError</code>. The result is quantized to the number of decimal
+places appropriate for the currency (2 for EUR) using round-half-up, and must be
+strictly greater than zero.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pysibs.mask_pan" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">mask_pan</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Mask anything that looks like a card number, keeping the last 4 digits.</p>
+<p><code>"4111 1111 1111 1111"</code> -&gt; <code>"************1111"</code>. Non-PAN text is returned
+unchanged.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pysibs.redact" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">redact</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">_depth</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a copy of <code>value</code> with sensitive fields masked, safe for logging.</p>
+<p>Recurses into dicts/lists. Values under a sensitive key are fully redacted; free
+strings have PAN-like sequences masked. Never mutates the input.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pysibs.build_3ds_redirect" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">build_3ds_redirect</span><span class="p">(</span><span class="n">action</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the bits needed to redirect the browser for 3DS.</p>
+<p><code>{"method": "POST", "url": ..., "fields": {...}}</code> — render these as an
+auto-submitting form (or use :func:<code>render_3ds_redirect_html</code>).</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pysibs.build_3ds_resubmit" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">build_3ds_resubmit</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">executed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Build the body to resubmit a card payment after the 3DS challenge completes.</p>
+<p>SIBS has <strong>no</strong> separate 3DS endpoint: once the shopper finishes the challenge you
+call <code>card/purchase</code> again (via :meth:<code>~pysibs.client.SIBSClient.submit_3ds</code>) with
+an <code>actionProcessed</code> object echoing the challenge <code>id</code> and <code>type</code>. This returns
+that body::</p>
+<pre><code>{"actionProcessed": {"id": ..., "type": "THREEDS_CHALLENGE", "executed": True}}
+</code></pre>
+<p><code>action</code> is the :class:<code>~pysibs.models.ActionResponse</code> from the original
+<code>paymentStatus: "Partial"</code> response. Raises :class:<code>SIBSValidationError</code> if it has
+no <code>id</code>.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pysibs.build_browser_data" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">build_browser_data</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">accept_header</span><span class="p">,</span> <span class="n">user_agent</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s1">&#39;en-US&#39;</span><span class="p">,</span> <span class="n">color_depth</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> <span class="n">screen_height</span><span class="p">,</span> <span class="n">screen_width</span><span class="p">,</span> <span class="n">timezone_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">java_enabled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Assemble the 3DS browser data collected from the shopper's browser.</p>
+<p>Returns a dict with the <code>browser*</code> field names SIBS uses. 3DS requires this device
+information; collect the values client-side (the <code>Accept</code>/<code>User-Agent</code> headers
+server-side). Per the official docs, place the result under <code>info.deviceInfo</code> in the
+<code>card/purchase</code> request body (the same call as
+:meth:<code>~pysibs.client.SIBSClient.pay_with_card</code>) — 3DS is not a separate endpoint.
+For example::</p>
+<pre><code>body = {"cardInfo": {...}, "info": {"deviceInfo": build_browser_data(...)}}
+</code></pre>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pysibs.render_3ds_redirect_html" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">render_3ds_redirect_html</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">auto_submit</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Render a self-contained HTML page that POSTs the shopper to the 3DS challenge.</p>
+<p>Return this as the body of your HTTP response when a card payment requires 3DS.
+All values are HTML-escaped.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pysibs.build_acknowledgement" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">build_acknowledgement</span><span class="p">(</span><span class="n">notification</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">status_code</span><span class="o">=</span><span class="s1">&#39;200&#39;</span><span class="p">,</span> <span class="n">status_msg</span><span class="o">=</span><span class="s1">&#39;Success&#39;</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Build the JSON body to return (with HTTP 200) so SIBS stops retrying.</p>
+<p>Accepts a :class:<code>WebhookEvent</code> or a raw notification id. Returns
+<code>{"statusCode": ..., "statusMsg": ..., "notificationID": ...}</code>.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pysibs.decrypt_webhook" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">decrypt_webhook</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">iv</span><span class="p">,</span> <span class="n">auth_tag</span><span class="p">,</span> <span class="n">secret</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">parse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Decrypt an AES-GCM encrypted SIBS webhook body.</p>
+<p><code>body</code> is the base64-encoded ciphertext sent by SIBS, <code>iv</code> the value of the
+<code>X-Initialization-Vector</code> header and <code>auth_tag</code> the value of the
+<code>X-Authentication-Tag</code> header (both base64). <code>secret</code> is the key configured in
+the SIBS Backoffice.</p>
+<p>Returns the decrypted JSON object (when <code>parse</code> is true) or <code>{"raw": &lt;text&gt;}</code>
+for a non-JSON plaintext. Raises :class:<code>SIBSInvalidWebhookSignature</code> if the
+ciphertext/tag fails authentication (tampered or wrong key), and
+:class:<code>SIBSConfigurationError</code> if the <code>cryptography</code> package is missing.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pysibs.hmac_sha256_verifier" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">hmac_sha256_verifier</span><span class="p">(</span><span class="n">secret</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Build an HMAC-SHA256 verifier for a given shared secret.</p>
+<p>.. note::
+   The SIBS Gateway does <strong>not</strong> sign webhooks with HMAC -- it encrypts them with
+   AES-GCM (see :func:<code>decrypt_webhook</code>). This helper is kept for custom schemes
+   and backwards compatibility only.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pysibs.parse_webhook" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">parse_webhook</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Parse a (decrypted) webhook body into a :class:<code>WebhookEvent</code>.</p>
+<p>Accepts the decrypted JSON as bytes/str or an already-decoded dict (e.g. the result
+of :func:<code>decrypt_webhook</code>). The original payload is always preserved on
+<code>event.raw_payload</code>; status is normalized but never raises on unknown values.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pysibs.verify_webhook_signature" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">verify_webhook_signature</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">secret</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">verifier</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">raise_on_failure</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Verify a webhook signature using HMAC-SHA256 or a custom <code>verifier</code>.</p>
+<p>.. note::
+   Retained for backwards compatibility and custom integrations. The SIBS Gateway
+   encrypts webhooks with AES-GCM rather than signing them; prefer
+   :func:<code>decrypt_webhook</code> for SIBS Gateway notifications.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
